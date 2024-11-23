@@ -16,7 +16,7 @@
                     <div class="modal-body">
                         <transition name="fade">
                             <div v-html="invalidInputs" class="alert alert-danger mt-3 text-center"
-                                v-if="this.invalidInputs != null" role="alert">
+                                v-if="invalidInputs != null" role="alert">
                             </div>
                         </transition>
                         <div class="form-group">
@@ -67,7 +67,7 @@
     <spinner :loading="isLoading"/>
 </template>
 
-<script>
+<script lang="ts">
 import { CompanyCreateDto } from '@/models/Companies/CompanyCreateDto';
 import { DatabaseCreateDto } from '@/models/Databases/DatabaseCreateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
@@ -76,14 +76,18 @@ import Swal from 'sweetalert2';
 export default {
     data() {
         return {
-            invalidInputs: null,
+            invalidInputs: null as string | null,
             companies: null,
             isLoading: false
         }
     },
+    components: {
+        "spinner": Spinner
+    },
     created() {
         this.setCompanies();
     },
+    emits: ['newCompanyCreated'],
     methods: {
         onSave() {
             this.isLoading = true;
@@ -93,18 +97,18 @@ export default {
                 return;
             }
 
-            var company = new CompanyCreateDto(
-                $('#createCompanyModal [name="name"]').val(),
-                $('#createCompanyModal [name="taxDepartment"]').val(),
-                $('#createCompanyModal [name="taxNumber"]').val(),
-                new DatabaseCreateDto(
-                    $('#createCompanyModal [name="server"]').val(),
-                    $('#createCompanyModal [name="databaseName"]').val(),
-                    $('#updateCompanyModal [name="userId"]').val(),
-                    $('#createCompanyModal [name="password"]').val()
-                ),
-                $('#createCompanyModal [name="fullAddress"]').val()
-            );
+            var company = {
+                name: $('#createCompanyModal [name="name"]').val(),
+                taxDepartment: $('#createCompanyModal [name="taxDepartment"]').val(),
+                taxNumber: $('#createCompanyModal [name="taxNumber"]').val(),
+                fullAddress: $('#createCompanyModal [name="fullAddress"]').val(),
+                database: {
+                    server: $('#createCompanyModal [name="server"]').val(),
+                    databaseName: $('#createCompanyModal [name="databaseName"]').val(),
+                    userId: $('#updateCompanyModal [name="userId"]').val(),
+                    password: $('#createCompanyModal [name="password"]').val()
+                }
+            } as CompanyCreateDto;
             this.$axios.post('/companies/create', company)
                 .then(() => {
                     Swal.fire("Şirket başarıyla oluşturuldu!");

@@ -1,6 +1,11 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import UserListComponent from '@/components/users/userList.vue'
+import CompanyListComponent from '@/components/companies/companyList.vue'
+import HomeListComponent from '@/components/home/homeList.vue'
+import CashRegisterListComponent from '@/components/cashRegisters/cashRegisterList.vue'
 import store from '../store/index'
+import CashRegisterDetailListComponent from '@/components/cashRegisterDetails/CashRegisterDetailList.vue'
 
 let authNotRequiredRoutes =[
   'login',
@@ -12,9 +17,31 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
-      path: '/',
       name: 'home',
-      component: HomeView
+      path: '/',
+      component: HomeView,
+      children: [
+        {
+          path: 'home',
+          component: HomeListComponent
+        },
+        {
+          path: 'users',
+          component: UserListComponent
+        },
+        {
+          path: 'companies',
+          component: CompanyListComponent
+        },
+        {
+          path: 'cashRegisters',
+          component: CashRegisterListComponent
+        },
+        {
+            path: 'cashRegisterDetails/:id',
+            component: CashRegisterDetailListComponent,
+        }
+      ],
     },
     {
       path: '/about',

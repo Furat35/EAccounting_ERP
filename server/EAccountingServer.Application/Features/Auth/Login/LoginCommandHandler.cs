@@ -1,10 +1,8 @@
 ﻿using EAccountingServer.Application.Models.Dtos.Companies;
-using EAccountingServer.Application.Models.Dtos.Users;
 using EAccountingServer.Application.Services;
 using EAccountingServer.Domain.Entities;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TS.Result;
@@ -15,12 +13,12 @@ namespace EAccountingServer.Application.Features.Auth.Login
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJwtProvider jwtProvider,
-        ICompanyUserRepository companyUserRepository) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
+        ICompanyUserRepository companyUserRepository) 
+        : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var user = await userManager.Users
-                .FirstOrDefaultAsync(p =>
+            var user = await userManager.Users.FirstOrDefaultAsync(p =>
                 p.UserName == request.EmailOrUserName ||
                 p.Email == request.EmailOrUserName,
                 cancellationToken);
@@ -44,7 +42,10 @@ namespace EAccountingServer.Application.Features.Auth.Login
             if (!signInResult.Succeeded)
                 return (400, "Geçersiz kullanıcı veya şifre!");
 
-            var companyUsers = await companyUserRepository.Where(cu => cu.UserId == user.Id).Include(cu => cu.Company).ToListAsync(cancellationToken);
+            var companyUsers = await companyUserRepository
+                .Where(cu => cu.UserId == user.Id)
+                .Include(cu => cu.Company)
+                .ToListAsync(cancellationToken);
             var companies = new List<CompanyListDto>();
             Guid? companyId = null;
             if (companyUsers.Count > 0)
@@ -59,7 +60,7 @@ namespace EAccountingServer.Application.Features.Auth.Login
                     FullAddress = cu.Company.FullAddress
                 }).ToList();
             }
-            
+
 
             var loginResponse = await jwtProvider.CreateToken(user, companyId, companies);
             //loginResponse.User = new UserListDto

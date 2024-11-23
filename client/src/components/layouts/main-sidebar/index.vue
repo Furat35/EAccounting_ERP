@@ -32,28 +32,36 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
-            <a routerLinkActive="active" name="homeList" @click="setActiveLink" class="nav-link active" style="cursor: pointer;">
+            <router-link to="/home" class="nav-link active" style="cursor: pointer;">
               <i class="nav-icon"></i>
               <p>
                 Ana Sayfa
               </p>
-            </a>
+            </router-link>
           </li>
-          <li class="nav-item">
-            <a routerLinkActive="active" name="userList" @click="setActiveLink" class="nav-link" style="cursor: pointer;">
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/users" class="nav-link" style="cursor: pointer;">
               <i class="nav-icon"></i>
               <p>
                 Kullanıcılar
               </p>
-            </a>
+            </router-link>
           </li>
-          <li class="nav-item">
-            <a routerLinkActive="active" name="companyList" @click="setActiveLink" class="nav-link" style="cursor: pointer;">
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/companies" class="nav-link" style="cursor: pointer;">
               <i class="nav-icon"></i>
               <p>
                 Şirketler
               </p>
-            </a>
+            </router-link>
+          </li>
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/cashRegisters" class="nav-link" style="cursor: pointer;">
+              <i class="nav-icon"></i>
+              <p>
+                Kasalar
+              </p>
+            </router-link>
           </li>
         </ul>
       </nav>
@@ -61,21 +69,35 @@
   </aside>
 </template>
 
-<script>
+<script >
 export default{
   data(){
     return {
-      activeLinkName: 'homeList'
+      activeLinkName: 'homeList',
+      user: false
     }
   },
+  created(){
+    this.user = this.$store.getters._getUser;
+  },
+  mounted(){
+    this.setActiveLink();
+
+  },
+  emits: ['activeComponent'],
   methods:{
-    setActiveLink($event){
-      if (this.activeLinkName) 
-        $(`[name=${this.activeLinkName}]`).removeClass('active');
-      $($event.target).addClass('active');
-      this.activeLinkName = $($event.target).attr('name');
-      this.$emit('activeComponent', this.activeLinkName);
+    setActiveLink(){
+      $('.main-sidebar .nav .nav-link').on('click', function(){
+        $(`.main-sidebar .nav .nav-link`).removeClass('active');
+        $(this).addClass('active')
+      });
+    }
+  },
+  computed:{
+    userIsAdmin(){
+      return this.user.isAdmin;
     }
   }
+ 
 }
 </script>

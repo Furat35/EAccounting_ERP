@@ -10,7 +10,7 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.Users.GetAllUsers
 {
     internal sealed class GetAllUsersQueryHandler(
-        UserManager<AppUser> userManager, 
+        UserManager<AppUser> userManager,
         IMapper mapper,
         ICacheService cacheService) : IRequestHandler<GetAllUsersQuery, Result<List<UserListDto>>>
     {
@@ -25,6 +25,7 @@ namespace EAccountingServer.Application.Features.Users.GetAllUsers
                    .OrderBy(u => u.FirstName)
                    .ToListAsync(cancellationToken);
                 users = mapper.Map<List<UserListDto>>(appUsers);
+                cacheService.Set("users", users);
             }
 
             return mapper.Map<List<UserListDto>>(users);

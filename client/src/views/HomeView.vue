@@ -5,6 +5,8 @@ import footer from '@/components/layouts/footer/index.vue'
 import companyList from '@/components/companies/companyList.vue'
 import userList from '@/components/users/userList.vue'
 import homeList from '@/components/home/homeList.vue'
+import cashRegisterList from '@/components/cashRegisters/cashRegisterList.vue'
+import Spinner from '@/components/layouts/spinner/index.vue';
 
 export default {
   data(){
@@ -18,34 +20,17 @@ export default {
     'app-footer': footer,
     'companyList': companyList,
     'userList': userList,
-    'homeList': homeList
-  },
-  methods: {
-    setActiveComponent(activeComponentName){
-      this.updateUrl(activeComponentName);
-      this.activeComponentName = activeComponentName;
-    },
-    updateUrl(component) {
-      // if (component === 'homeList') {
-      //   this.$router.push('/');
-      // }
-      // else if (component === 'userList') {
-      //   this.$router.push('/users');
-      // } 
-      // else if (component === 'companyList') {
-      //   this.$router.push('/companies');
-      // }
-    }
+    'homeList': homeList,
+    'cashRegisterList': cashRegisterList
   }
 }
 </script>
 
 <template>
-  <app-main-sidebar @activeComponent="setActiveComponent"></app-main-sidebar>
+  <app-main-sidebar></app-main-sidebar>
   <app-header-navbar></app-header-navbar>
   <div class="content-wrapper">
-    <!-- <router-view></router-view>  -->
-    <component :is="activeComponentName"></component>
+    <router-view></router-view> 
   </div>
   <app-footer></app-footer>
 </template>

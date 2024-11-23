@@ -1,16 +1,10 @@
-﻿using EAccountingServer.Domain.Entities;
+﻿using EAccountingServer.Domain.Abstractions;
+using EAccountingServer.Domain.Entities;
+using EAccountingServer.Domain.Enums;
 using EAccountingServer.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EAccountingServer.Infrastructure.Context
 {
@@ -35,7 +29,26 @@ namespace EAccountingServer.Infrastructure.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CashRegister>().Property(c => c.DepositAmount).HasColumnType("money");
+            modelBuilder.Entity<CashRegister>().Property(c => c.WithdrawalAmount).HasColumnType("money");
+            modelBuilder.Entity<CashRegister>()
+                .Property(c => c.CurrencyType)
+                .HasConversion(type => type.Value, value => CurrencyTypeEnum.FromValue(value));
+            modelBuilder.Entity<CashRegister>().HasQueryFilter(filter => !filter.IsDeleted);
+            modelBuilder.Entity<CashRegister>().HasMany(_ => _.Details).WithOne().HasForeignKey(_ => _.CashRegisterId);
+
+            modelBuilder.Entity<CashRegisterDetail>().Property(c => c.DepositAmount).HasColumnType("money");
+            modelBuilder.Entity<CashRegisterDetail>().Property(c => c.WithdrawalAmount).HasColumnType("money");
+            modelBuilder.Entity<CashRegisterDetail>().HasQueryFilter(filter => !filter.IsDeleted);
+            modelBuilder.Entity<CashRegisterDetail>()
+                .HasOne(c => c.CashRegisterDetailOpposite)
+                .WithOne()
+                .HasForeignKey<CashRegisterDetail>(c => c.CashRegisterDetailOppositeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
+        public DbSet<CashRegister> CashRegisters { get; set; }
+        public DbSet<CashRegisterDetail> CashRegisterDetails { get; set; }
 
         private void CreateConnectionString(IHttpContextAccessor httpContext, ApplicationDbContext context)
         {

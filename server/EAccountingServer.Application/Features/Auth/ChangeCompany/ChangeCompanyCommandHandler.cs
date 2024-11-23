@@ -15,7 +15,8 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
     public sealed class ChangeCompanyCommandHandler(
         ICompanyUserRepository companyUserRepository,
         UserManager<AppUser> userManager,
-        IHttpContextAccessor httpContextAccessor, IJwtProvider jwtProvider) : IRequestHandler<ChangeCompanyCommand, Result<LoginCommandResponse>>
+        IHttpContextAccessor httpContextAccessor, IJwtProvider jwtProvider) 
+        : IRequestHandler<ChangeCompanyCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(ChangeCompanyCommand request, CancellationToken cancellationToken)
         {
@@ -29,7 +30,11 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
 
             var user = await userManager.FindByIdAsync(userId);
 
-            var companyUsers = await companyUserRepository.Where(cu => cu.UserId == user.Id).Include(cu => cu.Company).ToListAsync(cancellationToken);
+            var companyUsers = await companyUserRepository
+                .Where(cu => cu.UserId == user.Id)
+                .Include(cu => cu.Company)
+                .ToListAsync(cancellationToken);
+
             var companies = companyUsers.Select(cu => new CompanyListDto
             {
                 Id = cu.CompanyId,
@@ -40,7 +45,7 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
             }).ToList();
 
             var response = await jwtProvider.CreateToken(user, request.CompanyId, companies);
-            return response; 
+            return response;
         }
     }
 }

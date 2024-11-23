@@ -4,8 +4,5 @@ using TS.Result;
 
 namespace EAccountingServer.Application.Features.Users.GetUserById
 {
-    public record GetUserByIdCommand : IRequest<Result<UserListDto>>
-    {
-        public string Id { get; set; }
-    }
+    public record GetUserByIdCommand(string Id) : IRequest<Result<UserListDto>>;
 }

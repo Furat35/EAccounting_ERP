@@ -4,39 +4,34 @@ using MediatR;
 
 namespace EAccountingServer.Application.Behaviors
 {
-    public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-            where TRequest : class, IRequest<TResponse>
+    public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) 
+        : IPipelineBehavior<TRequest, TResponse> where TRequest : class, IRequest<TResponse>
     {
-        private readonly IEnumerable<IValidator<TRequest>> _validators;
 
-        public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, 
+            CancellationToken cancellationToken)
         {
-            _validators = validators;
-        }
-
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
-        {
-            if (!_validators.Any())
+            if (!validators.Any())
             {
                 return await next();
             }
 
             var context = new ValidationContext<TRequest>(request);
 
-            var errorDictionary = _validators
+            var errorDictionary = validators
                 .Select(s => s.Validate(context))
                 .SelectMany(s => s.Errors)
                 .Where(s => s != null)
                 .GroupBy(
-                s => s.PropertyName,
-                s => s.ErrorMessage, (propertyName, errorMessage) => new
-                {
-                    Key = propertyName,
-                    Values = errorMessage.Distinct().ToArray()
+                    s => s.PropertyName,
+                    s => s.ErrorMessage, (propertyName, errorMessage) => new
+                    {
+                        Key = propertyName,
+                        Values = errorMessage.Distinct().ToArray()
                 })
                 .ToDictionary(s => s.Key, s => s.Values[0]);
 
-            if (errorDictionary.Any())
+            if (errorDictionary.Count == 0)
             {
                 var errors = errorDictionary.Select(s => new ValidationFailure
                 {

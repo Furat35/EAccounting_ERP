@@ -84,9 +84,10 @@
     </section>
 </template>
 
-<script>
+<script lang="ts">
 import { UserListDto } from '@/models/Users/UserListDto';
 import UserCreateModal from '@/components/users/userCreateModal.vue';
+
 import UserUpdateModal from '@/components/users/userUpdateModal.vue';
 import AppContentHeader from '@/components/layouts/content-header/index.vue';
 import Spinner from '@/components/layouts/spinner/index.vue';
@@ -102,51 +103,35 @@ export default {
     },
     data() {
         return {
-            users: null,
-            isLoading: false,
-            selectedUser: null
+            users: null as UserListDto[] | null,
+            selectedUser: null as UserListDto | null,
+            isLoading: false
         }
     },
     created() {
         this.getUsers();
     },
     methods: {
-        setSelectedUser(user) {
+        setSelectedUser(user: UserListDto) {
             this.selectedUser = user;
         },
         getUsers() {
             this.isLoading = true;
             this.$axios.get('users/getall')
                 .then(response => {
-                    var data = response.data.data;
-                    this.users = data.map((user) => new UserListDto(
-                        user.id,
-                        user.userName,
-                        user.email,
-                        user.phoneNumber,
-                        user.firstName,
-                        user.lastName,
-                        user.fullName,
-                        user.isDeleted,
-                        user.companyUsers // usera ait company bilgileri gelmiyor bakılacak
-                    ));
-
+                    this.users = response.data.data;
                 })
                 .catch(error => {
-                    let errorDetail = error.response.data.errorMessages[0];
-                    this.errorMessage = errorDetail;
-                    setTimeout(() => {
-                        this.errorMessage = null;
-                    }, 5000);
+                    console.log(error.response.data.errorMessages);
                 })
                 .finally(() => {
                     this.isLoading = false;
-                });
+                })
         },
         onDelete() {
             Swal.fire({
                 title: "Silmek istediğine emin misin?",
-                text: `${this.selectedUser.firstName} ${this.selectedUser.firstName} (${this.selectedUser.email})`,
+                text: `${this.selectedUser!.firstName} ${this.selectedUser!.firstName} (${this.selectedUser!.email})`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
@@ -155,11 +140,11 @@ export default {
                 confirmButtonText: "Sil"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    this.$axios.post('/users/delete', { id: this.selectedUser.id })
+                    this.$axios.post('/users/delete', { id: this.selectedUser!.id })
                         .then(() => {
                             Swal.fire({
                                 title: "Silme işlemi tamamlandı! ",
-                                text: `Kullanıcı başarıyla silindi. ${this.selectedUser.firstName} ${this.selectedUser.firstName}`,
+                                text: `Kullanıcı başarıyla silindi. ${this.selectedUser!.firstName} ${this.selectedUser!.firstName}`,
                                 icon: "success"
                             });
                             this.getUsers();

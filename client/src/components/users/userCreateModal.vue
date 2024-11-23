@@ -16,7 +16,7 @@
                     <div class="modal-body">
                         <transition name="fade">
                             <div v-html="invalidInputs" class="alert alert-danger mt-3 text-center"
-                                v-if="this.invalidInputs != null" role="alert">
+                                v-if="invalidInputs != null" role="alert">
                             </div>
                         </transition>
                         <div class="form-group">
@@ -34,6 +34,14 @@
                         <div class="form-group mt-2">
                             <label for="email">Mail Adresi</label>
                             <input type="email" minlength="3" name="email" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="isAdmin">
+                                <label class="form-check-label" for="isAdmin">
+                                    Admin mi?
+                                </label>
+                            </div>
                         </div>
                         <div class="form-group mt-2">
                             <label for="password">Şifre</label>
@@ -54,11 +62,12 @@
     <spinner :loading="isLoading"/>
 </template>
 
-<script>
+<script lang="ts">
 import { UserCreateDto } from '@/models/Users/UserCreateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 
 import Swal from 'sweetalert2';
+import type { CompanyListDto } from '@/models/Companies/CompanyListDto';
 
 export default {
     components: {
@@ -66,11 +75,12 @@ export default {
     },
     data() {
         return {
-            invalidInputs: null,
-            companies: null,
+            invalidInputs: null as string | null,
+            companies: null as CompanyListDto[] | null,
             isLoading: false
         }
     },
+    emits: ['newUserCreated'],
     created() {
         this.setCompanies();
     },
@@ -82,14 +92,15 @@ export default {
                 this.invalidInputs = checkInputs.join('<br>');
                 return;
             }
+            var user = {
+                userName: $('#createUserModal [name="userName"]').val(),
+                email: $('#createUserModal [name="email"]').val(),
+                firstName: $('#createUserModal [name="firstName"]').val(),
+                lastName: $('#createUserModal [name="lastName"]').val(),
+                password: $('#createUserModal [name="password"]').val(),
+                companyIds: $('#createUserModal [name="companyIds"]').val(),
+                isAdmin: $('#createUserModal [name="isAdmin"]').is(':checked') } as UserCreateDto
 
-            var user = new UserCreateDto(
-                $('#createUserModal [name="userName"]').val(),
-                $('#createUserModal [name="email"]').val(),
-                $('#createUserModal [name="firstName"]').val(),
-                $('#createUserModal [name="lastName"]').val(),
-                $('#createUserModal [name="password"]').val(),
-                $('#createUserModal [name="companyIds"]').val())
             this.$axios.post('/users/create', user)
                 .then(() => {
                     Swal.fire("Kullanıcı başarıyla oluşturuldu!");

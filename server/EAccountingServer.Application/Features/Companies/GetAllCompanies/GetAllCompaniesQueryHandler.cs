@@ -15,9 +15,12 @@ namespace EAccountingServer.Application.Features.Companies.GetAllCompanies
         public async Task<Result<List<Company>>> Handle(GetAllCompaniesQuery request, CancellationToken cancellationToken)
         {
             var companies = cacheService.Get<List<Company>>("companies");
-            if(companies is null)
+            if (companies is null)
             {
-                companies = await companyRepository.GetAll().OrderBy(c => c.Name).ToListAsync(cancellationToken);
+                companies = await companyRepository
+                    .GetAll()
+                    .OrderBy(c => c.Name)
+                    .ToListAsync(cancellationToken);
                 cacheService.Set("companies", companies);
             }
             return companies;

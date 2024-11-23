@@ -18,8 +18,8 @@ namespace EAccountingServer.Application.Features.Users.DeleteUserById
                 return Result<string>.Failure("Kullanıcı bulunamadı!");
 
             appUser.IsDeleted = true;
-
             var identityResult = await userManager.UpdateAsync(appUser);
+
             if (!identityResult.Succeeded)
                 return Result<string>.Failure(identityResult.Errors.Select(s => s.Description).ToList());
             cacheService.Remove("users");

@@ -29,7 +29,8 @@ export default createStore<State>({
       username: '',
       name: '',
       companyId: '',
-      companies: []
+      companies: [],
+      isAdmin: false
     },
   },
   getters: {

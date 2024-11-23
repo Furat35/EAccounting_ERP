@@ -14,6 +14,7 @@
     "axios": "^1.7.7",
     "bootstrap-icons": "^1.11.3",
     "crypto-js": "^4.2.0",
+    "jquery": "^3.7.1",
     "jwt-decode": "^4.0.0",
     "sweetalert2": "^11.13.3",
     "vue": "^3.4.29",
@@ -24,7 +25,8 @@
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
-    "@types/node": "^20.14.5",
+    "@types/jquery": "^3.5.31",
+    "@types/node": "^20.16.10",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/tsconfig": "^0.5.1",
     "npm-run-all2": "^6.2.0",

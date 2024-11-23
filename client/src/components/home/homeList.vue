@@ -36,8 +36,6 @@
 <script>
 import AppContentHeader from '@/components/layouts/content-header/index.vue';
 
-import Swal from 'sweetalert2';
-
 export default {
     components: {
         'app-content-header': AppContentHeader,

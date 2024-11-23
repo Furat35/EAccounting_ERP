@@ -37,6 +37,14 @@
                             <input type="email" minlength="3" name="email" class="form-control"
                                 :value="selectedUser?.email">
                         </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="isAdmin" :checked="selectedUser?.isAdmin">
+                                <label class="form-check-label" for="isAdmin">
+                                    Admin mi?
+                                </label>
+                            </div>
+                        </div>
                         <div class="form-group mt-2">
                             <label for="password">Şifre</label>
                             <input type="password" name="password" class="form-control" :value="selectedUser?.password">
@@ -58,10 +66,11 @@
     <spinner :loading="isLoading"/>
 </template>
 
-<script>
+<script lang="ts">
 import { UserUpdateDto } from '@/models/Users/UserUpdateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2';
+import type { CompanyListDto } from '@/models/Companies/CompanyListDto';
 
 export default {
     components: {
@@ -69,17 +78,20 @@ export default {
     },
     data() {
         return {
-            invalidInputs: null,
-            companies: null,
+            invalidInputs: null as string | null,
+            companies: null as CompanyListDto[] | null,
             isLoading: false
         }
     },
     created() {
         this.setCompanies();
     },
+    emits: ['userUpdated'],
     props: [
         'selectedUser'
     ],
+    mounted(){
+    },
     methods: {
         onUpdate() {
             this.isLoading = true;
@@ -89,9 +101,15 @@ export default {
                 return;
             }
 
-            var user = new UserUpdateDto($('#updateUserModal [name="id"]').val(), $('#updateUserModal [name="userName"]').val(),
-                $('#updateUserModal [name="email"]').val(), $('#updateUserModal [name="firstName"]').val(), $('#updateUserModal [name="lastName"]').val(),
-                $('#updateUserModal [name="password"]').val(), $('#updateUserModal [name="companyIds"]').val());
+            var user = {
+                id: $('#updateUserModal [name="id"]').val(), 
+                userName: $('#updateUserModal [name="userName"]').val(),
+                email: $('#updateUserModal [name="email"]').val(), 
+                firstName: $('#updateUserModal [name="firstName"]').val(), 
+                lastName: $('#updateUserModal [name="lastName"]').val(), 
+                password: $('#updateUserModal [name="password"]').val(), 
+                companyIds: $('#updateUserModal [name="companyIds"]').val(),
+                isAdmin: $('#updateUserModal [name="isAdmin"]').is(':checked')} as UserUpdateDto
             this.$axios.post('/users/update', user)
                 .then(() => {
                     Swal.fire("Kullanıcı başarıyla güncellendi!");
@@ -115,10 +133,10 @@ export default {
                 })
                 .finally(() => {
                     this.isLoading = false;
-                });
+                })
         },
-        isUsersCompany(companyId) {
-            return this.selectedUser?.companyUsers?.find(cu => cu.companyId == companyId);
+        isUsersCompany(companyId: any) {
+            return this.selectedUser?.companyUsers?.find((cu: any) => cu.companyId == companyId);
         },
         setCompanies() {
             this.$axios.get('/companies/getall')
@@ -160,7 +178,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .position-relative {
     position: relative;
 }

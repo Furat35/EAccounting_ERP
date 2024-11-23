@@ -26,7 +26,6 @@
 
 <script>
 import { LoginResponse } from '@/models/Logins/LoginResponse';
-import Spinner from '@/components/layouts/spinner/index.vue';
 import { jwtDecode } from "jwt-decode"
 
 export default {

@@ -43,6 +43,9 @@ namespace EAccountingServer.Infrastructure.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("varchar(50)");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 

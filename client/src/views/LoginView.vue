@@ -47,7 +47,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Login } from '@/models/Logins/Login'
 import { LoginResponse } from '@/models/Logins/LoginResponse';
 import { jwtDecode } from "jwt-decode"
@@ -61,20 +61,29 @@ export default {
     },
     methods: {
         login() {
-            this.spinnerIsActive = true
-            let loginData = new Login($('#email').val(), $('#password').val());
+            this.spinnerIsActive = true;
+            let loginData: Login = {
+                emailOrUserName: $('#email').val() as string,
+                password: $('#password').val() as string
+            };
             this.$axios.post('auth/login', loginData)
                 .then(response => {
-                    console.log(response.data.data)
-                    var jsonData = JSON.stringify(response.data.data)
-                    const decodedToken = jwtDecode(response.data.data.token)
-                    let companies = JSON.parse(decodedToken.Companies);
-                    let loginResponse = new LoginResponse(decodedToken.Id, decodedToken.Email, 
-                    decodedToken.UserName, decodedToken.Name, decodedToken.CompanyId, companies);
-                    console.log(loginResponse);
-                     this.$store.commit("setUser", loginResponse)
-                    localStorage.setItem('tokenInfo', jsonData)
-                    this.$router.push({name: 'home'})
+                    var jsonData = JSON.stringify(response.data.data);
+                    const decodedToken = jwtDecode(response.data.data.token) as any;
+                    let companies = JSON.parse(decodedToken.Companies || []);
+                    let isAdmin = decodedToken.IsAdmin.toLowerCase() === 'true';
+                    let loginResponse = {
+                        id: decodedToken.Id,
+                        email: decodedToken.Email,
+                        username: decodedToken.UserName,
+                        name: decodedToken.Name, 
+                        companyId: decodedToken.CompanyId , 
+                        companies: companies as [], 
+                        isAdmin: isAdmin 
+                    } as  LoginResponse;
+                    this.$store.commit("setUser", loginResponse);
+                    localStorage.setItem('tokenInfo', jsonData);
+                    this.$router.push({name: 'home'});
 
                 })
                 .catch(error => {
@@ -85,14 +94,14 @@ export default {
                     catch {
                         errorDetail = "Kullanıcı oluşturulurken hata oluştu!";
                     }
-                    this.errorMessage = errorDetail
+                    this.errorMessage = errorDetail;
                     setTimeout(() => {
-                        this.errorMessage = null
+                        this.errorMessage = null;
                     }, 5000);
                 })
                 .finally(() => {
                     this.spinnerIsActive = false;
-                });
+                })
         }
     }
 }

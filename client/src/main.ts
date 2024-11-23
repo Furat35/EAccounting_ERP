@@ -6,9 +6,9 @@ import store from './store'
 
 
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(router)
-app.use(store)
-app.config.globalProperties.$axios = axios
-app.mount('#app')
+app.use(router);
+app.use(store);
+app.config.globalProperties.$axios = axios;
+app.mount('#app');

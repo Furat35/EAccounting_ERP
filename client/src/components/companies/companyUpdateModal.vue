@@ -16,7 +16,7 @@
                     <div class="modal-body">
                         <transition name="fade">
                             <div v-html="invalidInputs" class="alert alert-danger mt-3 text-center"
-                                v-if="this.invalidInputs != null" role="alert">
+                                v-if="invalidInputs != null" role="alert">
                             </div>
                         </transition>
                         <div class="form-group">
@@ -74,9 +74,8 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import { CompanyUpdateDto } from '@/models/Companies/CompanyUpdateDto';
-import { DatabaseCreateDto } from '@/models/Databases/DatabaseCreateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2'
 
@@ -87,8 +86,7 @@ export default {
     },
     data() {
         return {
-            invalidInputs: null,
-            companies: null,
+            invalidInputs: null as string | null,
             isLoading: false
         }
     },
@@ -103,19 +101,19 @@ export default {
                 this.invalidInputs = checkInputs.join('<br>');
                 return;
             }
-            var company = new CompanyUpdateDto(
-                this.selectedCompany?.id,
-                $('#updateCompanyModal [name="name"]').val(),
-                $('#updateCompanyModal [name="taxDepartment"]').val(),
-                $('#updateCompanyModal [name="taxNumber"]').val(),
-                $('#updateCompanyModal [name="fullAddress"]').val(),
-                new DatabaseCreateDto(
-                    $('#updateCompanyModal [name="server"]').val(),
-                    $('#updateCompanyModal [name="databaseName"]').val(),
-                    $('#updateCompanyModal [name="userId"]').val(),
-                    $('#updateCompanyModal [name="password"]').val()
-                )
-            )
+            var company = {
+                id: this.selectedCompany?.id,
+                name: $('#updateCompanyModal [name="name"]').val(),
+                fullAddress: $('#updateCompanyModal [name="taxDepartment"]').val(),
+                taxDepartment: $('#updateCompanyModal [name="taxNumber"]').val(),
+                taxNumber: $('#updateCompanyModal [name="fullAddress"]').val(),
+                database: {
+                    server: $('#updateCompanyModal [name="server"]').val(),
+                    databaseName: $('#updateCompanyModal [name="databaseName"]').val(),
+                    userId: $('#updateCompanyModal [name="userId"]').val(),
+                    password: $('#updateCompanyModal [name="password"]').val(),
+                }
+            } as CompanyUpdateDto;
 
             this.$axios.post('/companies/update', company)
                 .then(() => {
@@ -167,7 +165,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .position-relative {
     position: relative;
 }

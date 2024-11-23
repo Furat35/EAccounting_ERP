@@ -98,12 +98,12 @@
     </section>
 </template>
 
-<script>
-import { CompanyListDto } from '@/models/Companies/CompanyListDto';
+<script lang="ts">
 import CompanyCreateModal from '@/components/companies/companyCreateModal.vue';
 import CompanyUpdateModal from '@/components/companies/companyUpdateModal.vue';
 import AppContentHeader from '@/components/layouts/content-header/index.vue';
 import Spinner from '@/components/layouts/spinner/index.vue';
+import type { CompanyListDto } from '@/models/Companies/CompanyListDto';
 
 import Swal from 'sweetalert2';
 
@@ -116,48 +116,35 @@ export default {
     },
     data() {
         return {
-            companies: null,
+            companies: null as CompanyListDto[] | null,
             isLoading: false,
-            selectedCompany: null
+            selectedCompany: null as CompanyListDto | null
         }
     },
     created() {
         this.getCompanies();
     },
     methods: {
-        setSelectedCompany(company) {
+        setSelectedCompany(company: CompanyListDto) {
             this.selectedCompany = company;
         },
         getCompanies() {
             this.isLoading = true;
             this.$axios.get('companies/getall')
                 .then(response => {
-                    var data = response.data.data
-                    this.companies = data.map((company) => new CompanyListDto(
-                        company.id,
-                        company.name,
-                        company.isDeleted,
-                        company.taxDepartment,
-                        company.taxNumber,
-                        company.database,
-                        company.fullAddress,
-                    ));
+                    this.companies = response.data.data
                 })
                 .catch(error => {
-                    let errorDetail = error.response.data.errorMessages[0];
-                    this.errorMessage = errorDetail;
-                    setTimeout(() => {
-                        this.errorMessage = null;
-                    }, 5000);
+                    console.log(error.response.data.errorMessages)
                 })
                 .finally(() => {
                     this.isLoading = false;
-                });
+                })
         },
         onDelete() {
             Swal.fire({
                 title: "Silmek istediğine emin misin?",
-                text: `${this.selectedCompany.name} şirketi silinecektir.`,
+                text: `${this.selectedCompany!.name} şirketi silinecektir.`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
@@ -166,11 +153,11 @@ export default {
                 confirmButtonText: "Sil"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    this.$axios.post('/companies/delete', { id: this.selectedCompany.id })
+                    this.$axios.post('/companies/delete', { id: this.selectedCompany!.id })
                         .then(() => {
                             Swal.fire({
                                 title: "Silme işlemi tamamlandı! ",
-                                text: `Şirket başarıyla silindi. (${this.selectedCompany.name})`,
+                                text: `Şirket başarıyla silindi. (${this.selectedCompany!.name})`,
                                 icon: "success"
                             });
                             this.getCompanies();
@@ -206,7 +193,7 @@ export default {
             }).then((result) => {
                 if (result.isConfirmed) {
                     this.$axios.post('companies/migrateAll')
-                        .then(response => {
+                        .then(() => {
                             Swal.fire({
                                 title: "Veritabanı güncelleme işlemi tamamlandı! ",
                                 text: `Şirketler başarıyla güncellendi.`,
@@ -214,20 +201,10 @@ export default {
                             });
                         })
                         .catch(error => {
-                            let errorDetail;
-                            try {
-                                errorDetail = error.response.data.errorMessages[0];
-                            }
-                            catch {
-                                errorDetail = "Veritabanları güncellenirken hata oluştu!";
-                            }
-                            this.errorMessage = errorDetail;
-                            setTimeout(() => {
-                                this.errorMessage = null;
-                            }, 5000);
+                            console.log(error.response.data.errorMessages);
                         })
                 }
-            });
+            })
 
 
         }
