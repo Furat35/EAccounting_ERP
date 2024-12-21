@@ -4,8 +4,10 @@ import UserListComponent from '@/components/users/userList.vue'
 import CompanyListComponent from '@/components/companies/companyList.vue'
 import HomeListComponent from '@/components/home/homeList.vue'
 import CashRegisterListComponent from '@/components/cashRegisters/cashRegisterList.vue'
+import BankDetailListComponent from '@/components/bankDetails/BankDetailList.vue'
 import store from '../store/index'
 import CashRegisterDetailListComponent from '@/components/cashRegisterDetails/CashRegisterDetailList.vue'
+import BanksListComponent from '@/components/banks/bankList.vue'
 
 let authNotRequiredRoutes =[
   'login',
@@ -40,6 +42,14 @@ const router = createRouter({
         {
             path: 'cashRegisterDetails/:id',
             component: CashRegisterDetailListComponent,
+        },
+        {
+          path: '/banks',
+          component: BanksListComponent,
+        },
+        {
+          path: '/bankDetails/:id',
+          component: BankDetailListComponent,
         }
       ],
     },
@@ -57,7 +67,7 @@ const router = createRouter({
       path: '/statuscode',
       name: 'statuscode',
       component: () => import('../views/StatusCodeView.vue')
-    },
+    }
   ]
 })
 

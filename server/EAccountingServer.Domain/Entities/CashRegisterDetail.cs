@@ -11,6 +11,10 @@ namespace EAccountingServer.Domain.Entities
         public decimal DepositAmount { get; set; }
         public decimal WithdrawalAmount { get; set; }
         public Guid? CashRegisterDetailOppositeId { get; set; }
-        public CashRegisterDetail? CashRegisterDetailOpposite   { get; set; }
+        public CashRegisterDetail? CashRegisterDetailOpposite { get; set; }
+        public Guid? BankDetailId { get; set; }
+        [ForeignKey(nameof(BankDetailId))]
+        public BankDetail? BankDetail{ get; set; }
+        public bool IsCreatedByThis { get; set; }
     }
 }

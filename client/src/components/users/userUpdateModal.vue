@@ -15,31 +15,31 @@
                 <form @submit.prevent autocomplete="off">
                     <div class="modal-body">
                         <div class="form-group">
-                            <input type="text" name="id" hidden class="form-control" :value="selectedUser?.id">
+                            <input type="text" name="id" hidden class="form-control" v-model="updateModel.id">
                         </div>
                         <div class="form-group">
                             <label for="firstName">Ad</label>
                             <input type="text" minlength="3" name="firstName" class="form-control"
-                                :value="selectedUser?.firstName">
+                                v-model="updateModel.firstName">
                         </div>
                         <div class="form-group mt-2">
                             <label for="lastName">Soyad</label>
                             <input type="text" minlength="3" name="lastName" class="form-control"
-                                :value="selectedUser?.lastName">
+                                v-model="updateModel.lastName">
                         </div>
                         <div class="form-group">
                             <label for="userName">Kullanıcı Adı</label>
                             <input type="text" minlength="3" name="userName" class="form-control"
-                                :value="selectedUser?.userName">
+                                v-model="updateModel.userName">
                         </div>
                         <div class="form-group mt-2">
                             <label for="email">Mail Adresi</label>
                             <input type="email" minlength="3" name="email" class="form-control"
-                                :value="selectedUser?.email">
+                                v-model="updateModel.email">
                         </div>
                         <div class="mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="isAdmin" :checked="selectedUser?.isAdmin">
+                                <input class="form-check-input" type="checkbox" name="isAdmin" v-model="updateModel.isAdmin">
                                 <label class="form-check-label" for="isAdmin">
                                     Admin mi?
                                 </label>
@@ -47,7 +47,7 @@
                         </div>
                         <div class="form-group mt-2">
                             <label for="password">Şifre</label>
-                            <input type="password" name="password" class="form-control" :value="selectedUser?.password">
+                            <input type="password" name="password" class="form-control" v-model="updateModel.password">
                         </div>
                         <div class="form-group mt-2">
                             <label for="CompanyIds">Bağlı Olduğu Şirketler</label><br>
@@ -71,46 +71,45 @@ import { UserUpdateDto } from '@/models/Users/UserUpdateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2';
 import type { CompanyListDto } from '@/models/Companies/CompanyListDto';
+import { UserListDto } from '@/models/Users/UserListDto';
 
 export default {
     components: {
         'spinner': Spinner
     },
+    emits: ['userUpdated'],
+    props: {
+        'selectedUser': {
+            type: UserListDto,
+            required: true
+        }
+    },
+    watch: {
+        selectedUser(){
+            this.invalidInputs = null;
+            this.updateModel = Object.assign(new UserUpdateDto(), this.selectedUser);
+        }
+    },
     data() {
         return {
             invalidInputs: null as string | null,
             companies: null as CompanyListDto[] | null,
-            isLoading: false
+            isLoading: false,
+            updateModel: new UserUpdateDto()
         }
     },
     created() {
         this.setCompanies();
     },
-    emits: ['userUpdated'],
-    props: [
-        'selectedUser'
-    ],
-    mounted(){
-    },
     methods: {
         onUpdate() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
 
-            var user = {
-                id: $('#updateUserModal [name="id"]').val(), 
-                userName: $('#updateUserModal [name="userName"]').val(),
-                email: $('#updateUserModal [name="email"]').val(), 
-                firstName: $('#updateUserModal [name="firstName"]').val(), 
-                lastName: $('#updateUserModal [name="lastName"]').val(), 
-                password: $('#updateUserModal [name="password"]').val(), 
-                companyIds: $('#updateUserModal [name="companyIds"]').val(),
-                isAdmin: $('#updateUserModal [name="isAdmin"]').is(':checked')} as UserUpdateDto
-            this.$axios.post('/users/update', user)
+            this.isLoading = true;
+            this.updateModel.companyIds = $('#updateUserModal [name="companyIds"]').val() as string[];
+
+            this.$axios.post('/users/update', this.updateModel)
                 .then(() => {
                     Swal.fire("Kullanıcı başarıyla güncellendi!");
                     this.invalidInputs = null;
@@ -161,47 +160,24 @@ export default {
         },
         checkInputs() {
             let errorMessages = []
-            if (!$('#updateUserModal [name="userName"]').val())
+            if (!this.updateModel.userName)
                 errorMessages.push('Kullanıcı adını giriniz!');
-            if (!$('#updateUserModal [name="email"]').val())
+            if (!this.updateModel.email)
                 errorMessages.push('Email giriniz!');
-            if (!$('#updateUserModal [name="firstName"]').val())
+            if (!this.updateModel.firstName)
                 errorMessages.push('Ad giriniz!');
-            if (!$('#updateUserModal [name="lastName"]').val())
+            if (!this.updateModel.lastName)
                 errorMessages.push('Soyad adını giriniz!');
             if (!$('#updateUserModal [name="companyIds"]').val())
                 errorMessages.push('Şirket seçiniz!');
 
-            return errorMessages;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            
+            return true;
         }
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

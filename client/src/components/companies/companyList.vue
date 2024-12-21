@@ -59,8 +59,8 @@
                                 <td>{{ company.fullAddress }}</td>
                                 <td>{{ company.taxDepartment }}</td>
                                 <td>{{ company.taxNumber }}</td>
-                                <td>{{ company.database.server }}</td>
-                                <td>{{ company.database.databaseName }}</td>
+                                <td>{{ company.database?.server }}</td>
+                                <td>{{ company.database?.databaseName }}</td>
                                 <td>
                                     <button type="button" data-dismiss="modal" class="btn btn-outline-danger"
                                         style="margin-right: 10px;" @click="setSelectedCompany(company); onDelete()">
@@ -118,7 +118,7 @@ export default {
         return {
             companies: null as CompanyListDto[] | null,
             isLoading: false,
-            selectedCompany: null as CompanyListDto | null
+            selectedCompany: null as CompanyListDto | null,
         }
     },
     created() {

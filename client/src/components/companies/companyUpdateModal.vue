@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Şirket Güncelleme</h1><button type="button" data-dismiss="modal"
-                        class="btn btn-outline-danger" @click="closeModal()">
+                        class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
                             <path
@@ -22,47 +22,47 @@
                         <div class="form-group">
                             <label for="name">Şirket Adı</label>
                             <input type="text" minlength="3" name="name" class="form-control"
-                                :value="selectedCompany?.name">
+                                v-model="updateModel.name">
                         </div>
                         <div class="form-group mt-2">
                             <label for="fullAddress">Açık Adres</label>
                             <input type="text" minlength="3" name="fullAddress" class="form-control"
-                                :value="selectedCompany?.fullAddress">
+                            v-model="updateModel.fullAddress">
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="taxDepartment">Vergi Dairesi</label>
                                     <input type="text" minlength="3" name="taxDepartment" class="form-control"
-                                        :value="selectedCompany?.taxDepartment">
+                                    v-model="updateModel.taxDepartment">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="taxNumber">Vergi Numarası</label>
                                     <input type="text" minlength="3" name="taxNumber" class="form-control"
-                                        :value="selectedCompany?.taxNumber">
+                                    v-model="updateModel.taxNumber">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mt-2">
                             <label for="server">Server</label>
                             <input type="text" name="server" class="form-control"
-                                :value="selectedCompany?.database.server">
+                                v-model="updateModel.database.server">
                         </div>
                         <div class="form-group mt-2">
                             <label for="databaseName">Veritabanı Adı</label>
                             <input type="text" name="databaseName" class="form-control"
-                                :value="selectedCompany?.database.databaseName">
+                                v-model="updateModel.database.databaseName">
                         </div>
                         <div class="form-group mt-2">
                             <label for="userId">Kullanıcı Id</label>
                             <input type="text" name="userId" class="form-control"
-                                :value="selectedCompany?.database.userId">
+                                v-model="updateModel.database.userId">
                         </div>
                         <div class="form-group mt-2">
                             <label for="password">Şifre</label>
-                            <input type="password" name="password" class="form-control">
+                            <input type="password" name="password" class="form-control" v-model="updateModel.database.password">
                         </div>
                     </div>
                     <div class="modal-footer"><button class="btn btn-dark w-100" @click="onUpdate">Güncelle</button>
@@ -78,8 +78,8 @@
 import { CompanyUpdateDto } from '@/models/Companies/CompanyUpdateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2'
+import { CompanyListDto } from '@/models/Companies/CompanyListDto';
 
-// hatalı input verildiğinde kapatıp açıldığında hata mesajı durmaya devam ediyor. İnput validasyonları kontrol edilmeli
 export default {
     components: {
         'spinner': Spinner
@@ -87,35 +87,29 @@ export default {
     data() {
         return {
             invalidInputs: null as string | null,
-            isLoading: false
+            isLoading: false,
+            updateModel: new CompanyUpdateDto()
         }
     },
-    props: [
-        'selectedCompany'
-    ],
+    props: {
+        'selectedCompany': {
+            type: CompanyListDto,
+            required: true
+        }
+    },
+    watch: {
+        selectedCompany(){
+            this.invalidInputs = null;
+            this.updateModel = Object.assign(new CompanyUpdateDto(), this.selectedCompany);
+        }
+    },
     methods: {
         onUpdate() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
-            var company = {
-                id: this.selectedCompany?.id,
-                name: $('#updateCompanyModal [name="name"]').val(),
-                fullAddress: $('#updateCompanyModal [name="taxDepartment"]').val(),
-                taxDepartment: $('#updateCompanyModal [name="taxNumber"]').val(),
-                taxNumber: $('#updateCompanyModal [name="fullAddress"]').val(),
-                database: {
-                    server: $('#updateCompanyModal [name="server"]').val(),
-                    databaseName: $('#updateCompanyModal [name="databaseName"]').val(),
-                    userId: $('#updateCompanyModal [name="userId"]').val(),
-                    password: $('#updateCompanyModal [name="password"]').val(),
-                }
-            } as CompanyUpdateDto;
 
-            this.$axios.post('/companies/update', company)
+            this.isLoading = true;
+            this.$axios.post('/companies/update', this.updateModel)
                 .then(() => {
                     Swal.fire("Şirket başarıyla güncellendi!");
                     this.invalidInputs = null;
@@ -142,53 +136,25 @@ export default {
         },
         checkInputs() {
             let errorMessages = [];
-            if (!$('#updateCompanyModal [name="name"]').val())
+            if (!this.updateModel.name)
                 errorMessages.push('Şirket adını giriniz!');
-            if (!$('#updateCompanyModal [name="fullAddress"]').val())
+            if (!this.updateModel.fullAddress)
                 errorMessages.push('Açık adres giriniz!');
-            if (!$('#updateCompanyModal [name="taxDepartment"]').val())
+            if (!this.updateModel.taxDepartment)
                 errorMessages.push('Vergi dairesini giriniz!');
-            if (!$('#updateCompanyModal [name="taxNumber"]').val())
+            if (!this.updateModel.taxNumber)
                 errorMessages.push('Vergi no giriniz!');
-            if (!$('#updateCompanyModal [name="server"]').val())
+            if (!this.updateModel.database.server)
                 errorMessages.push('Server giriniz!');
-            if (!$('#updateCompanyModal [name="databaseName"]').val())
+            if (!this.updateModel.database.databaseName)
                 errorMessages.push('Veritabanı adı giriniz!');
 
-            return errorMessages;
-        },
-        closeModal() {
-            this.invalidInputs = null;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            return true;
         }
-
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

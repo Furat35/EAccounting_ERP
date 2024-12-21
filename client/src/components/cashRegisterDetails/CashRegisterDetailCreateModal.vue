@@ -39,6 +39,7 @@
                             <select name="cashRegisterDetailRecordType" class="form-control"  v-model="createModel.recordType">
                                 <option value="0">Diğer</option>
                                 <option value="1">Kasa</option>
+                                <option value="2">Banka</option>
                             </select>
                         </div>
                         <div v-show="createModel.recordType == 1">
@@ -46,6 +47,14 @@
                                 <label for="oppositeCashRegisterId">Kasa</label><br>
                                 <select name="oppositeCashRegisterId" class="form-control" v-model="createModel.oppositeCashRegisterId">
                                     <option :value="cashRegister.id" v-for="cashRegister in cashRegisters">{{ cashRegister.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div v-show="createModel.recordType == 2">
+                            <div class="form-group mt-2">
+                                <label for="bankId">Banka</label><br>
+                                <select name="bankId" class="form-control" v-model="createModel.bankId">
+                                    <option :value="bank.id" v-for="bank in banks">{{ bank.name }}</option>
                                 </select>
                             </div>
                         </div>
@@ -68,6 +77,7 @@ import Swal from 'sweetalert2';
 import { CurrencyTypes, type CurrencyTypeModel } from '@/models/currency-type-enum';
 import type { CashRegisterListDto } from '@/models/CashRegisters/CashRegisterListDto';
 import { CashRegisterDetailCreateDto } from '@/models/CashRegistersDetails/CashRegisterDetailCreateDto';
+import type BankListDto from '@/models/Banks/BankListDto';
 
 export default {
     data() {
@@ -77,7 +87,8 @@ export default {
             cashRegisters: null as CashRegisterListDto[] | null,
             cashRegister: null as CashRegisterListDto | null,
             isLoading: false,
-            currencyTypes: [] as CurrencyTypeModel[]
+            currencyTypes: [] as CurrencyTypeModel[],
+            banks: [] as BankListDto[]
         }
     },
     components: {
@@ -88,6 +99,7 @@ export default {
     ],
     created() {
         this.setCashRegisters();
+        this.getBanks();
         this.currencyTypes = CurrencyTypes;
     },
     methods: {
@@ -104,14 +116,28 @@ export default {
                     this.isLoading = false;
                 })
         },
-        onSave() {
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
-                return;
-            }
+        getBanks() {
             this.isLoading = true;
-            if(this.createModel.oppositeCashRegisterId === ""){
+            this.$axios.get('banks/getall')
+                .then(response => {
+                    this.banks = response.data.data as BankListDto[];
+                })
+                .catch(error => {
+                    console.log(error.response.data.errorMessages);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                })
+        },
+        onSave() {
+            if(!this.checkInputs())
+                return;
+
+            this.isLoading = true;
+            if(this.createModel.oppositeCashRegisterId == ""){
+                this.createModel.oppositeCashRegisterId = null;
+            }
+            else if(this.createModel.bankId == ""){
                 this.createModel.oppositeCashRegisterId = null;
             }
             this.createModel.cashRegisterId = this.$route.params.id.toString();
@@ -120,7 +146,6 @@ export default {
                     Swal.fire("Kasa hareketi başarıyla oluşturuldu!");
                     this.$emit('newCashRegisterDetailCreated');
                     this.invalidInputs = null;
-                    this.createModel = new CashRegisterDetailCreateDto();
                 })
                 .catch(error => {
                     let errorDetail;
@@ -143,41 +168,17 @@ export default {
         },
         checkInputs() {
             let errorMessages = []
-            if (!$('#createCashRegisterDetailModal [name="cashRegisterDetailDate"]').val())
-                errorMessages.push('Tarih giriniz!');
-            if (!$('#createCashRegisterDetailModal [name="cashRegisterDetailDescription"]').val())
+            if (!this.createModel.description)
                 errorMessages.push('Açıklama giriniz!');
-             
-            return errorMessages;
+            if (!this.createModel.amount)
+                errorMessages.push('Miktar giriniz!');
+
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            return true;
         }
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

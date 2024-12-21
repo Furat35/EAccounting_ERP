@@ -3,8 +3,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5">Kasa Ekleme</h1><button type="button" data-dismiss="modal"
-                        @click="resetForm" class="btn btn-outline-danger">
+                    <h1 class="modal-title fs-5">Kasa Ekleme</h1><button type="button" data-dismiss="modal" class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
                             <path
@@ -21,11 +20,11 @@
                         </transition>
                         <div class="form-group">
                             <label for="name">Kasa Adı</label>
-                            <input type="text" minlength="3" name="cashRegisterName" class="form-control">
+                            <input type="text" minlength="3" name="cashRegisterName" v-model="createModel.name"class="form-control">
                         </div>
                         <div class="form-group mt-2">
                             <label for="currencyType">Döviz Tipi</label><br>
-                            <select name="currencyType" class="form-control">
+                            <select name="currencyType" class="form-control" v-model="createModel.currencyType">
                                 <option :value="cashRegister.value" v-for="cashRegister in currencyTypes">{{ cashRegister.name }}</option>
                             </select>
                         </div>
@@ -50,7 +49,8 @@ export default {
             invalidInputs: null as any,
             cashRegisters: null,
             isLoading: false,
-            currencyTypes: [] as CurrencyTypeModel[]
+            currencyTypes: [] as CurrencyTypeModel[],
+            createModel: new CashRegisterCreateDto()
         }
     },
     components: {
@@ -63,21 +63,13 @@ export default {
     emits: ['newCashRegisterCreated'],
     methods: {
         onSave() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
-            var cashRegister = 
-            { 
-                name: $('#createCashRegisterModal [name="cashRegisterName"]').val(), 
-                currencyType: $('#createCashRegisterModal [name="currencyType"]').val()
-            } as CashRegisterCreateDto;
-            this.$axios.post('/cashRegisters/create', cashRegister)
+
+            this.isLoading = true; 
+            this.$axios.post('/cashRegisters/create', this.createModel)
                 .then(() => {
                     Swal.fire("Kasa başarıyla oluşturuldu!");
-                    this.resetForm();
                     this.invalidInputs = null;
                     this.$emit('newCashRegisterCreated');
                 })
@@ -121,12 +113,10 @@ export default {
                     });
                 });
         },
-        resetForm() {
-            $('#createCashRegisterModal [name="cashRegisterName"]').val('');
-        },
+        
         checkInputs() {
             let errorMessages = []
-            if (!$('#createCashRegisterModal [name="cashRegisterName"]').val())
+            if (!this.createModel.name)
                 errorMessages.push('Kasa adını giriniz!');
 
             return errorMessages;
@@ -134,31 +124,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

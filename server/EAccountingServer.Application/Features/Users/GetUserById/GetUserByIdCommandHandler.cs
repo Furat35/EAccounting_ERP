@@ -14,7 +14,7 @@ namespace EAccountingServer.Application.Features.Users.GetUserById
         {
             var user = await userManager.FindByIdAsync(request.Id);
             if (user is null)
-                return Result<UserListDto>.Failure(StatusCodes.Status404NotFound, "Bu mail adresi daha önce kullanılmış.");
+                return Result<UserListDto>.Failure(StatusCodes.Status404NotFound, "Kullanıcı bulunamadı.");
 
             return mapper.Map<UserListDto>(user);
         }

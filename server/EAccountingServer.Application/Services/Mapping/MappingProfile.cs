@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using EAccountingServer.Application.Features.Banks.CreateBank;
+using EAccountingServer.Application.Features.Banks.UpdateBank;
 using EAccountingServer.Application.Features.CashRegisters.CreateCashRegister;
 using EAccountingServer.Application.Features.CashRegisters.UpdateCashRegister;
 using EAccountingServer.Application.Features.Companies.CreateCompany;
@@ -26,6 +28,13 @@ namespace EAccountingServer.Application.Mapping
                 .ForMember(dest => dest.CurrencyType,
                        opt => opt.MapFrom(src => CurrencyTypeEnum.FromValue(src.CurrencyType)));
             CreateMap<UpdateCashRegisterCommand, CashRegister>()
+                .ForMember(dest => dest.CurrencyType,
+                       opt => opt.MapFrom(src => CurrencyTypeEnum.FromValue(src.CurrencyType)));
+
+            CreateMap<CreateBankCommand, Bank>()
+                    .ForMember(dest => dest.CurrencyType,
+                           opt => opt.MapFrom(src => CurrencyTypeEnum.FromValue(src.CurrencyType)));
+            CreateMap<UpdateBankCommand, Bank>()
                 .ForMember(dest => dest.CurrencyType,
                        opt => opt.MapFrom(src => CurrencyTypeEnum.FromValue(src.CurrencyType)));
         }

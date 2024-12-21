@@ -13,7 +13,7 @@ namespace EAccountingServer.Application.Features.Auth.Login
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJwtProvider jwtProvider,
-        ICompanyUserRepository companyUserRepository) 
+        ICompanyUserRepository companyUserRepository)
         : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)

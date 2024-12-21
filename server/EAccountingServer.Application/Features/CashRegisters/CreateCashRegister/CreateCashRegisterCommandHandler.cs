@@ -23,7 +23,7 @@ namespace EAccountingServer.Application.Features.CashRegisters.CreateCashRegiste
 
             var cashRegister = mapper.Map<CashRegister>(request);
 
-            await cashRegisterRepository.AddAsync(cashRegister);
+            await cashRegisterRepository.AddAsync(cashRegister, cancellationToken);
             await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             cacheService.Remove("cashRegisters");
 

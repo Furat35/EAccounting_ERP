@@ -42,3 +42,31 @@ export default {
     }
 }
 </script>
+
+<style>
+.position-relative {
+    position: relative;
+}
+
+.show-password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9em;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.7s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

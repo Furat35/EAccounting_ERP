@@ -3,7 +3,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5">Kasa Hareketi Ekleme</h1>
+                    <h1 class="modal-title fs-5">Kasa Hareketi Güncelleme</h1>
                     <button type="button" data-dismiss="modal" class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
@@ -74,7 +74,8 @@ export default {
     ],
     watch: {
         selectedCashRegisterDetail(){
-            this.updateModel = { ...this.selectedCashRegisterDetail } ;
+            this.invalidInputs = null;
+            this.updateModel = Object.assign(new CashRegisterDetailUpdateDto(), this.selectedCashRegisterDetail);
             this.updateModel.amount = this.selectedCashRegisterDetail.withdrawalAmount + this.selectedCashRegisterDetail.depositAmount;
         }
     },
@@ -90,11 +91,9 @@ export default {
     },
     methods: {
         onSave() {
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
+
             this.isLoading = true;
             this.updateModel.cashRegisterId = this.$route.params.id.toString();
             this.$axios.post('/cashRegisterDetails/update', this.updateModel)
@@ -102,7 +101,6 @@ export default {
                     Swal.fire("Kasa işlemi başarıyla güncellendi!");
                     this.invalidInputs = null;
                     this.$emit('cashRegisterDetailUpdated');
-                    this.updateModel = new CashRegisterDetailUpdateDto();
                 })
                 .catch(error => {
                     let errorDetail;
@@ -132,42 +130,17 @@ export default {
         },
         checkInputs() {
             let errorMessages = []
-            if (!$('#updateCashRegisterDetailModal [name="cashRegisterDetailDescription"]').val())
+            if (!this.updateModel.description)
                 errorMessages.push('Açıklama giriniz!');
-            if (!$('#updateCashRegisterDetailModal [name="cashRegisterDetailAmount"]').val())
-                errorMessages.push('Açıklama giriniz!');
+            if (!this.updateModel.amount)
+                errorMessages.push('Miktar giriniz!');
 
-            return errorMessages;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            return true;
         },
-       
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

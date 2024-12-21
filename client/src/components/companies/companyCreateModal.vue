@@ -3,8 +3,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5">Şirket Ekleme</h1><button type="button" data-dismiss="modal"
-                        @click="resetForm" class="btn btn-outline-danger">
+                    <h1 class="modal-title fs-5">Şirket Ekleme</h1><button type="button" data-dismiss="modal" class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
                             <path
@@ -69,7 +68,6 @@
 
 <script lang="ts">
 import { CompanyCreateDto } from '@/models/Companies/CompanyCreateDto';
-import { DatabaseCreateDto } from '@/models/Databases/DatabaseCreateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2';
 
@@ -78,7 +76,8 @@ export default {
         return {
             invalidInputs: null as string | null,
             companies: null,
-            isLoading: false
+            isLoading: false,
+            createModel: new CompanyCreateDto()
         }
     },
     components: {
@@ -90,29 +89,13 @@ export default {
     emits: ['newCompanyCreated'],
     methods: {
         onSave() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
 
-            var company = {
-                name: $('#createCompanyModal [name="name"]').val(),
-                taxDepartment: $('#createCompanyModal [name="taxDepartment"]').val(),
-                taxNumber: $('#createCompanyModal [name="taxNumber"]').val(),
-                fullAddress: $('#createCompanyModal [name="fullAddress"]').val(),
-                database: {
-                    server: $('#createCompanyModal [name="server"]').val(),
-                    databaseName: $('#createCompanyModal [name="databaseName"]').val(),
-                    userId: $('#updateCompanyModal [name="userId"]').val(),
-                    password: $('#createCompanyModal [name="password"]').val()
-                }
-            } as CompanyCreateDto;
-            this.$axios.post('/companies/create', company)
+            this.isLoading = true;
+            this.$axios.post('/companies/create', this.createModel)
                 .then(() => {
                     Swal.fire("Şirket başarıyla oluşturuldu!");
-                    this.resetForm();
                     this.invalidInputs = null;
                     this.$emit('newCompanyCreated');
                 })
@@ -156,32 +139,26 @@ export default {
                     });
                 });
         },
-        resetForm() {
-            $('#createCompanyModal [name="name"]').val('');
-            $('#createCompanyModal [name="taxDepartment"]').val('');
-            $('#createCompanyModal [name="taxNumber"]').val('');
-            $('#createCompanyModal [name="server"]').val('');
-            $('#createCompanyModal [name="databaseName"]').val('');
-            $('#createCompanyModal [name="password"]').val('');
-            $('#createCompanyModal [name="fullAddress"]').val('');
-        },
         checkInputs() {
-            let errorMessages = []
-            if (!$('#createCompanyModal [name="name"]').val())
+            let errorMessages = [];
+            if (!this.createModel.name)
                 errorMessages.push('Şirket adını giriniz!');
-            if (!$('#createCompanyModal [name="fullAddress"]').val())
+            if (!this.createModel.fullAddress)
                 errorMessages.push('Açık adres giriniz!');
-            if (!$('#createCompanyModal [name="taxDepartment"]').val())
+            if (!this.createModel.taxDepartment)
                 errorMessages.push('Vergi dairesini giriniz!');
-            if (!$('#createCompanyModal [name="taxNumber"]').val())
+            if (!this.createModel.taxNumber)
                 errorMessages.push('Vergi no giriniz!');
-            if (!$('#createCompanyModal [name="server"]').val())
+            if (!this.createModel.database.server)
                 errorMessages.push('Server giriniz!');
-            if (!$('#createCompanyModal [name="databaseName"]').val())
+            if (!this.createModel.database.databaseName)
                 errorMessages.push('Veritabanı adı giriniz!');
-  
 
-            return errorMessages;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            return true;
         }
     }
 }

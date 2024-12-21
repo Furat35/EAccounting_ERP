@@ -1,12 +1,11 @@
-﻿using EAccountingServer.Domain.Enums;
-using MediatR;
+﻿using MediatR;
 using TS.Result;
 
 namespace EAccountingServer.Application.Features.CashRegisters.UpdateCashRegister
 {
     public sealed record UpdateCashRegisterCommand(
-        Guid Id, 
-        string Name, 
+        Guid Id,
+        string Name,
         int CurrencyType)
         : IRequest<Result<string>>;
 }

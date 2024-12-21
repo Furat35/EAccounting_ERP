@@ -10,8 +10,7 @@ namespace EAccountingServer.Application.Features.CashRegisters.UpdateCashRegiste
         ICashRegisterRepository cashRegisterRepository,
         IUnitOfWorkCompany unitOfWorkCompany,
         IMapper mapper,
-        ICacheService cacheService)
-        : IRequestHandler<UpdateCashRegisterCommand, Result<string>>
+        ICacheService cacheService) : IRequestHandler<UpdateCashRegisterCommand, Result<string>>
     {
         public async Task<Result<string>> Handle(UpdateCashRegisterCommand request, CancellationToken cancellationToken)
         {

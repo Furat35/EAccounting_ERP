@@ -87,11 +87,9 @@
 <script lang="ts">
 import { UserListDto } from '@/models/Users/UserListDto';
 import UserCreateModal from '@/components/users/userCreateModal.vue';
-
 import UserUpdateModal from '@/components/users/userUpdateModal.vue';
 import AppContentHeader from '@/components/layouts/content-header/index.vue';
 import Spinner from '@/components/layouts/spinner/index.vue';
-
 import Swal from 'sweetalert2';
 
 export default {
@@ -104,7 +102,7 @@ export default {
     data() {
         return {
             users: null as UserListDto[] | null,
-            selectedUser: null as UserListDto | null,
+            selectedUser: new UserListDto(),
             isLoading: false
         }
     },
@@ -113,7 +111,7 @@ export default {
     },
     methods: {
         setSelectedUser(user: UserListDto) {
-            this.selectedUser = user;
+            this.selectedUser = Object.assign(new UserListDto(), user);
         },
         getUsers() {
             this.isLoading = true;
@@ -123,6 +121,7 @@ export default {
                 })
                 .catch(error => {
                     console.log(error.response.data.errorMessages);
+                    this.isLoading = false;
                 })
                 .finally(() => {
                     this.isLoading = false;

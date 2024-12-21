@@ -3,8 +3,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5">Kullanıcı Ekleme</h1><button type="button" data-dismiss="modal"
-                        @click="resetForm" class="btn btn-outline-danger">
+                    <h1 class="modal-title fs-5">Kullanıcı Ekleme</h1><button type="button" data-dismiss="modal" class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
                             <path
@@ -21,23 +20,23 @@
                         </transition>
                         <div class="form-group">
                             <label for="firstName">Ad</label>
-                            <input type="text" minlength="3" name="firstName" class="form-control">
+                            <input type="text" minlength="3" name="firstName" v-model="createModel.firstName" class="form-control">
                         </div>
                         <div class="form-group mt-2">
                             <label for="lastName">Soyad</label>
-                            <input type="text" minlength="3" name="lastName" class="form-control">
+                            <input type="text" minlength="3" name="lastName" v-model="createModel.lastName" class="form-control">
                         </div>
                         <div class="form-group">
                             <label for="userName">Kullanıcı Adı</label>
-                            <input type="text" minlength="3" name="userName" class="form-control">
+                            <input type="text" minlength="3" name="userName" v-model="createModel.userName" class="form-control">
                         </div>
                         <div class="form-group mt-2">
                             <label for="email">Mail Adresi</label>
-                            <input type="email" minlength="3" name="email" class="form-control">
+                            <input type="email" minlength="3" name="email" v-model="createModel.email" class="form-control">
                         </div>
                         <div class="mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="isAdmin">
+                                <input class="form-check-input" type="checkbox"  name="isAdmin" v-model="createModel.isAdmin">
                                 <label class="form-check-label" for="isAdmin">
                                     Admin mi?
                                 </label>
@@ -45,7 +44,7 @@
                         </div>
                         <div class="form-group mt-2">
                             <label for="password">Şifre</label>
-                            <input type="password" name="password" class="form-control">
+                            <input type="password" name="password" v-model="createModel.password" class="form-control">
                         </div>
                         <div class="form-group mt-2">
                             <label for="CompanyIds">Bağlı Olduğu Şirketler</label><br>
@@ -65,7 +64,6 @@
 <script lang="ts">
 import { UserCreateDto } from '@/models/Users/UserCreateDto';
 import Spinner from '@/components/layouts/spinner/index.vue';
-
 import Swal from 'sweetalert2';
 import type { CompanyListDto } from '@/models/Companies/CompanyListDto';
 
@@ -77,7 +75,8 @@ export default {
         return {
             invalidInputs: null as string | null,
             companies: null as CompanyListDto[] | null,
-            isLoading: false
+            isLoading: false,
+            createModel: new UserCreateDto()
         }
     },
     emits: ['newUserCreated'],
@@ -86,25 +85,14 @@ export default {
     },
     methods: {
         onSave() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
-            var user = {
-                userName: $('#createUserModal [name="userName"]').val(),
-                email: $('#createUserModal [name="email"]').val(),
-                firstName: $('#createUserModal [name="firstName"]').val(),
-                lastName: $('#createUserModal [name="lastName"]').val(),
-                password: $('#createUserModal [name="password"]').val(),
-                companyIds: $('#createUserModal [name="companyIds"]').val(),
-                isAdmin: $('#createUserModal [name="isAdmin"]').is(':checked') } as UserCreateDto
+            this.isLoading = true;
 
-            this.$axios.post('/users/create', user)
+            this.createModel.companyIds = $('#createUserModal [name="companyIds"]').val() as string[];
+            this.$axios.post('/users/create', this.createModel)
                 .then(() => {
                     Swal.fire("Kullanıcı başarıyla oluşturuldu!");
-                    this.resetForm();
                     this.invalidInputs = null;
                     this.$emit('newUserCreated');
                 })
@@ -148,56 +136,25 @@ export default {
                     });
                 })
         },
-        resetForm() {
-            $('#createUserModal [name="userName"]').val('');
-            $('#createUserModal [name="email"]').val('');
-            $('#createUserModal [name="firstName"]').val('');
-            $('#createUserModal [name="lastName"]').val('');
-            $('#createUserModal [name="password"]').val('');
-        },
         checkInputs() {
             let errorMessages = []
-            if (!$('#createUserModal [name="userName"]').val())
+            if (!this.createModel.userName)
                 errorMessages.push('Kullanıcı adını giriniz!');
-            if (!$('#createUserModal [name="email"]').val())
+            if (!this.createModel.email)
                 errorMessages.push('Email giriniz!');
-            if (!$('#createUserModal [name="firstName"]').val())
+            if (!this.createModel.firstName)
                 errorMessages.push('Ad giriniz!');
-            if (!$('#createUserModal [name="lastName"]').val())
+            if (!this.createModel.lastName)
                 errorMessages.push('Soyad adını giriniz!');
             if (!$('#createUserModal [name="companyIds"]').val())
                 errorMessages.push('Şirket seçiniz!');
 
-            return errorMessages;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            return true;
         }
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

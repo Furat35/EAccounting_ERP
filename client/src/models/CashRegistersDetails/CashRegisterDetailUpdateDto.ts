@@ -1,5 +1,3 @@
-import { CashRegisterListDto } from "../CashRegisters/CashRegisterListDto";
-
 export class CashRegisterDetailUpdateDto{
     id: string = "";
     cashRegisterId: string = "";

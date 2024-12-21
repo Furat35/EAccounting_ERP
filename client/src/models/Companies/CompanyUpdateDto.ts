@@ -1,4 +1,4 @@
-import type { DatabaseUpdateDto } from "../Databases/DatabaseUpdateDto";
+import { DatabaseUpdateDto } from "../Databases/DatabaseUpdateDto";
 
 export class CompanyUpdateDto {
   id: string = "";
@@ -6,5 +6,5 @@ export class CompanyUpdateDto {
   fullAddress: string = "";
   taxDepartment: string = "";
   taxNumber: string = "";
-  database: DatabaseUpdateDto | null = null;
+  database: DatabaseUpdateDto = new DatabaseUpdateDto() ;
 }

@@ -30,7 +30,10 @@
                         <input type="date" class="form-control" name="endDate" placeholder="Bitiş Tarihi" v-model="endDate">
                     </div>
                     <div class="col-auto">
-                        <button class="btn btn-success" @click="getCashRegisterDetails()">Ara</button>
+                        <button class="btn btn-success" @click="getAll=false;getCashRegisterDetails()">Ara</button>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary" @click="getAll=true;getCashRegisterDetails()">Tümü</button>
                     </div>
                     <div class="col-2 ml-auto">
                         <input type="search" placeholder="Aranacak değer girin..."
@@ -59,26 +62,82 @@
                                 <td>{{ cashRegisterDetail.depositAmount }}</td>
                                 <td>{{ cashRegisterDetail.withdrawalAmount }}</td>
                                 <td>
-                                    <button type="button" data-dismiss="modal" class="btn btn-outline-danger" 
-                                        @click="setSelectedCashRegisterDetail(cashRegisterDetail);onDelete()" style="margin-right: 10px;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-person-dash" viewBox="0 0 16 16">
-                                            <path
-                                                d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1m0-7a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
-                                            <path
-                                                d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
-                                        </svg>
-                                    </button>
-                                    <button type="button" data-dismiss="modal" class="btn btn-outline-success"
-                                        data-toggle="modal" data-target="#updateCashRegisterDetailModal"  @click="setSelectedCashRegisterDetail(cashRegisterDetail);">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                            <path
-                                                d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                            <path fill-rule="evenodd"
-                                                d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
-                                        </svg>
-                                    </button>
+                                    <div v-if="cashRegisterDetail.isCreatedByThis">
+                                        <button type="button" data-dismiss="modal" class="btn btn-outline-danger" 
+                                            @click="setSelectedCashRegisterDetail(cashRegisterDetail);onDelete()" style="margin-right: 10px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-person-dash" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1m0-7a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+                                                <path
+                                                    d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" data-dismiss="modal" class="btn btn-outline-success"
+                                            data-toggle="modal" data-target="#updateCashRegisterDetailModal"  @click="setSelectedCashRegisterDetail(cashRegisterDetail);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                <path fill-rule="evenodd"
+                                                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div v-if="!cashRegisterDetail.isCreatedByThis">
+                                        <button type="button" data-dismiss="modal" class="btn btn-outline-success"
+                                            data-toggle="modal" data-target="#viewCashRegisterDetailModal"  @click="setSelectedCashRegisterDetail(cashRegisterDetail);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                <path fill-rule="evenodd"
+                                                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                                            </svg>
+                                        </button>
+                                        
+                                        <div class="modal fade" id="viewCashRegisterDetailModal" tabindex="-1" role="dialog" aria-labelledby="viewCashRegisterDetailModal">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5"><span style="font-size: 16px;"> Tarih : {{ selectedCashRegisterDetail.date }} <span style="font-size: 10px;">({{selectedCashRegisterDetail.cashRegisterId}})</span> </span></h1>
+                                                        <button type="button" data-dismiss="modal" class="btn btn-outline-danger">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                                class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                                <path
+                                                                    d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    <form @submit.prevent autocomplete="off">
+                                                        <div class="modal-body">
+                                                            <div class="form-group mt-2">
+                                                                <label for="cashRegisterDetailType">İşlem Tipi</label><br>
+                                                                <input type="text" name="cashRegisterDetailType" class="form-control" :value="selectedCashRegisterDetail.type == 0 ? 'Giriş' : 'Çıkış'" readonly>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div>
+                                                                    <label for="cashRegisterDetailAmount">Giriş/Çıkış Tutarı</label>
+                                                                    <input type="text" name="cashRegisterDetailAmount" class="form-control"  :value="selectedCashRegisterDetail.amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="selectedCashRegisterDetail?.oppositeCashRegisterId != null && selectedCashRegisterDetail?.oppositeCashRegisterId != ''">
+                                                                <div class="form-group mt-2">
+                                                                    <label for="oppositeCashRegister">Kasa</label><br>
+                                                                    <input type="text" name="oppositeCashRegister" class="form-control" :value="getOppositeCashRegister()" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="cashRegisterDetailDescription">Açıklama</label>
+                                                                <input type="text" minlength="3" name="cashRegisterDetailDescription" class="form-control"  :value="selectedCashRegisterDetail.description" readonly>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -116,9 +175,9 @@ export default {
             endDate: null as string | null,
             cashRegisterId: null as string | null,
             isLoading: false,
+            getAll: false,
             selectedCashRegisterDetail: new CashRegisterDetailListDto(),
-            cashRegisterDetailCreateModalIsOpen: false,
-            cashRegisterDetailUpdateModalIsOpen: false,
+            oppositeCashRegister: null as CashRegisterListDto | null,
         }
     },
     created() {
@@ -141,7 +200,7 @@ export default {
             this.isLoading = true;
             this.$axios.get('cashRegisterDetails/getall', {
                     params: {
-                        cashRegisterId: this.cashRegisterId, startDate: this.startDate, endDate: this.endDate
+                        cashRegisterId: this.cashRegisterId, startDate: this.startDate, endDate: this.endDate, getAll: this.getAll
                     }
                 })
                 .then(response => {
@@ -152,6 +211,13 @@ export default {
                 })
                 .finally(() => {
                     this.isLoading = false;
+                });
+        },
+        getOppositeCashRegister(){
+            this.$axios.get('cashRegisters/getall')
+                .then(response => {
+                    var cashRegisters = response.data.data as CashRegisterListDto[];
+                    this.oppositeCashRegister = cashRegisters.find(c => c.id == this.selectedCashRegisterDetail.oppositeCashRegisterId) as CashRegisterListDto;
                 });
         },
         onDelete() {

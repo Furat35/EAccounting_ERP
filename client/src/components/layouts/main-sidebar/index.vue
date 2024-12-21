@@ -63,6 +63,14 @@
               </p>
             </router-link>
           </li>
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/banks" class="nav-link" style="cursor: pointer;">
+              <i class="nav-icon"></i>
+              <p>
+                Bankalar
+              </p>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </div>

@@ -7,6 +7,8 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashRegisterDetail
 {
     public sealed class CreateCashRegisterDetailCommandHandler(
+        IBankRepository bankRepository,
+        IBankDetailRepository bankDetailRepository,
         ICashRegisterRepository cashRegisterRepository,
         ICashRegisterDetailRepository cashRegisterDetailRepository,
         IUnitOfWorkCompany unitOfWorkCompany,
@@ -18,7 +20,7 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
                 .GetByExpressionWithTrackingAsync(p => p.Id == request.CashRegisterId, cancellationToken);
 
             CashRegisterDetail cashRegisterDetail = null;
-            if (request.OppositeCashRegisterId != null)
+            if (request.OppositeCashRegisterId != null || request.BankId != null)
             {
                 cashRegister.WithdrawalAmount += request.Amount;
                 cashRegisterDetail = new CashRegisterDetail()
@@ -27,7 +29,8 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
                     DepositAmount = 0,
                     WithdrawalAmount = request.Amount,
                     Description = request.Description,
-                    CashRegisterId = request.CashRegisterId
+                    CashRegisterId = request.CashRegisterId,
+                    IsCreatedByThis = true
                 };
             }
             else
@@ -40,7 +43,8 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
                     DepositAmount = request.Type == 0 ? request.Amount : 0,
                     WithdrawalAmount = request.Type == 1 ? request.Amount : 0,
                     Description = request.Description,
-                    CashRegisterId = request.CashRegisterId
+                    CashRegisterId = request.CashRegisterId,
+                    IsCreatedByThis = true
                 };
             }
 
@@ -65,9 +69,30 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
                 };
                 cashRegisterDetail.CashRegisterDetailOppositeId = oppositeCashRegisterDetail.Id;
                 await cashRegisterDetailRepository.AddAsync(oppositeCashRegisterDetail, cancellationToken);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
-            await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            else if (request.BankId is not null)
+            {
+                var bank = await bankRepository
+                    .GetByExpressionWithTrackingAsync(p => p.Id == request.BankId, cancellationToken);
+                bank.DepositAmount += request.Amount;
+
+                var bankDetail = new BankDetail()
+                {
+                    Date = request.Date,
+                    DepositAmount = request.Amount,
+                    WithdrawalAmount = 0,
+                    CashRegisterDetailId = cashRegisterDetail.Id,
+                    BankId = request.BankId,
+                    Description = request.Description,
+                };
+                cashRegisterDetail.BankDetailId = bankDetail.Id;
+                await bankDetailRepository.AddAsync(bankDetail, cancellationToken);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
+
             cacheService.Remove("cashRegisters");
+            cacheService.Remove("banks");
 
             return "Kasa hareketi başarıyla işlendi.";
         }

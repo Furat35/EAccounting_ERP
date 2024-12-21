@@ -15,7 +15,7 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
     public sealed class ChangeCompanyCommandHandler(
         ICompanyUserRepository companyUserRepository,
         UserManager<AppUser> userManager,
-        IHttpContextAccessor httpContextAccessor, IJwtProvider jwtProvider) 
+        IHttpContextAccessor httpContextAccessor, IJwtProvider jwtProvider)
         : IRequestHandler<ChangeCompanyCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(ChangeCompanyCommand request, CancellationToken cancellationToken)

@@ -1,12 +1,14 @@
-﻿  using EAccountingServer.Application.Services;
-using EAccountingServer.Domain.Entities;
+﻿using EAccountingServer.Application.Services;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using TS.Result;
 
 namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashRegisterDetailById
 {
-    public sealed class DeleteCashRegisterDetailByIdCommandHandler(
+    public sealed class DeleteBankDetailByIdCommandHandler(
+        IBankDetailRepository bankDetailRepository,
+        IBankRepository bankRepository,
         ICashRegisterRepository cashRegisterRepository,
         ICashRegisterDetailRepository cashRegisterDetailRepository,
         IUnitOfWorkCompany unitOfWorkCompany,
@@ -19,6 +21,9 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashR
 
             if (cashRegisterDetail is null)
                 return Result<string>.Failure("Kasa hareketi bulunamadı.");
+
+            if (cashRegisterDetail.IsCreatedByThis)
+                return Result<string>.Failure(StatusCodes.Status400BadRequest, "Yetkisiz işlem.");
 
             var cashRegister = await cashRegisterRepository
                 .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.CashRegisterId, cancellationToken);
@@ -38,15 +43,8 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashR
                 var oppositeCashRegisterDetail = await cashRegisterDetailRepository
                     .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.CashRegisterDetailOppositeId, cancellationToken);
                 oppositeCashRegisterDetail.IsDeleted = true;
-
-                if (cashRegisterDetail is null)
-                    return Result<string>.Failure("Kasa hareketi bulunamadı.");
-
                 var oppositeCashRegister = await cashRegisterRepository
                     .GetByExpressionWithTrackingAsync(p => p.Id == oppositeCashRegisterDetail.CashRegisterId, cancellationToken);
-
-                if (oppositeCashRegister is null)
-                    return Result<string>.Failure("Kasa bulunamadı.");
 
                 oppositeCashRegister.DepositAmount -= oppositeCashRegisterDetail.DepositAmount;
                 oppositeCashRegister.WithdrawalAmount -= oppositeCashRegisterDetail.WithdrawalAmount;
@@ -54,11 +52,26 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashR
                 cashRegisterDetailRepository.Update(oppositeCashRegisterDetail);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
+            else if (cashRegisterDetail.BankDetailId is not null)
+            {
+                var oppositeBankDetail = await bankDetailRepository
+                    .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.BankDetailId, cancellationToken);
+                oppositeBankDetail.IsDeleted = true;
 
-           
+                var oppositeBank = await bankRepository
+                    .GetByExpressionWithTrackingAsync(p => p.Id == oppositeBankDetail.BankId, cancellationToken);
+
+                oppositeBank.DepositAmount -= oppositeBankDetail.DepositAmount;
+                oppositeBank.WithdrawalAmount -= oppositeBankDetail.WithdrawalAmount;
+
+                bankDetailRepository.Update(oppositeBankDetail);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
+
             cacheService.Remove("cashRegisters");
+            cacheService.Remove("banks");
 
             return "Kasa hareketi başarıyla silindi.";
         }
-    } 
- }
+    }
+}

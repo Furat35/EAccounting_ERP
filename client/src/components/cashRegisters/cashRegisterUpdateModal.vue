@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Kasa Güncelleme</h1><button type="button" data-dismiss="modal"
-                        @click="resetForm" class="btn btn-outline-danger">
+                        class="btn btn-outline-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-x-lg" viewBox="0 0 16 16">
                             <path
@@ -21,7 +21,7 @@
                         </transition>
                         <div class="form-group">
                             <label for="cashRegisterName">Kasa Adı</label>
-                            <input type="text" minlength="3" name="cashRegisterName" class="form-control" :value="selectedCashRegister?.name">
+                            <input type="text" minlength="3" name="cashRegisterName" class="form-control" v-model="selectedCashRegister.name">
                         </div>
                         <div class="form-group mt-2">
                             <label for="currencyType">Döviz Tipi</label><br>
@@ -51,13 +51,20 @@ export default {
             invalidInputs: null as string | null,
             cashRegisters: null,
             isLoading: false,
-            currencyTypes: [] as CurrencyTypeModel[]
+            currencyTypes: [] as CurrencyTypeModel[],
+            updateModel: new CashRegisterUpdateDto()
         }
     },
     props: {
         'selectedCashRegister': {
             type: CashRegisterListDto,
             required: true
+        }
+    },
+    watch: {
+        selectedCashRegister(){
+            this.invalidInputs = null;
+            this.updateModel = Object.assign(new CashRegisterUpdateDto(), this.selectedCashRegister);
         }
     },
     components: {
@@ -70,21 +77,14 @@ export default {
     emits: ['cashRegisterUpdated'],
     methods: {
         onUpdate() {
-            this.isLoading = true;
-            let checkInputs = this.checkInputs();
-            if (checkInputs.length != 0) {
-                this.invalidInputs = checkInputs.join('<br>');
+            if(!this.checkInputs())
                 return;
-            }
-            var cashRegister = {
-                id: this.selectedCashRegister.id,
-                name: $('#updateCashRegisterModal [name="cashRegisterName"]').val(),
-                currencyType:  $('#updateCashRegisterModal [name="currencyType"]').val()
-            } as CashRegisterUpdateDto;
-            this.$axios.post('/cashRegisters/update', cashRegister)
+            this.isLoading = true;
+            
+            this.updateModel.currencyType = $('#updateCashRegisterModal [name="currencyType"]').val() as number;
+            this.$axios.post('/cashRegisters/update', this.updateModel)
                 .then(() => {
                     Swal.fire("Kasa başarıyla güncellendi!");
-                    this.resetForm();
                     this.invalidInputs = null;
                     this.$emit('cashRegisterUpdated');
                 })
@@ -131,44 +131,18 @@ export default {
         setActiveCurrency(currencyType: CurrencyTypeModel){
             return this.selectedCashRegister?.currencyType.value === currencyType.value;
         },
-        resetForm() {
-            $('#createCashRegisterModal [name="cashRegisterName"]').val('');
-        },
         checkInputs() {
             let errorMessages = []
-            if (!$('#updateCashRegisterModal [name="cashRegisterName"]').val())
+            if (!this.updateModel.name)
                 errorMessages.push('Kasa adını giriniz!');
 
-            return errorMessages;
+            if (errorMessages.length != 0) {
+                this.invalidInputs = errorMessages.join('<br>');
+                return false;
+            }
+            
+            return true;
         }
     }
 }
 </script>
-
-<style scoped>
-.position-relative {
-    position: relative;
-}
-
-.show-password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.7s ease;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

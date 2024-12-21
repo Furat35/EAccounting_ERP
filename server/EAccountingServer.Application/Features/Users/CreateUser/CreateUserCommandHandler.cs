@@ -13,8 +13,7 @@ namespace EAccountingServer.Application.Features.Users.CreateUser
         IMediator mediator,
         UserManager<AppUser> userManager,
         IMapper mapper,
-        ICacheService cacheService)
-        : IRequestHandler<CreateUserCommand, Result<string>>
+        ICacheService cacheService) : IRequestHandler<CreateUserCommand, Result<string>>
     {
         public async Task<Result<string>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {

@@ -5,5 +5,5 @@ export class CompanyCreateDto{
     fullAddress: string = "";
     taxDepartment: string = "";
     taxNumber: string = "";
-    database: DatabaseCreateDto | null = null;
+    database: DatabaseCreateDto = new DatabaseCreateDto();
 }

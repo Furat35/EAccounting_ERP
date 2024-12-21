@@ -111,7 +111,7 @@ export default {
     },
     methods: {
         setSelectedCashRegister(cashRegister: CashRegisterListDto) {
-            this.selectedCashRegister = cashRegister;
+            this.selectedCashRegister = Object.assign(new CashRegisterListDto(), cashRegister);
         },
         getCashRegisters() {
             this.isLoading = true;

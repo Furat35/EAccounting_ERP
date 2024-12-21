@@ -22,6 +22,79 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Bank", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("CurrencyType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("money");
+
+                    b.Property<string>("IBAN")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("WithdrawalAmount")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Banks");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.BankDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BankDetailOppositeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BankId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CashRegisterDetailId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("money");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCreatedByThis")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("WithdrawalAmount")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BankDetailOppositeId");
+
+                    b.HasIndex("BankId");
+
+                    b.HasIndex("CashRegisterDetailId");
+
+                    b.ToTable("BankDetails");
+                });
+
             modelBuilder.Entity("EAccountingServer.Domain.Entities.CashRegister", b =>
                 {
                     b.Property<Guid>("Id")
@@ -54,6 +127,9 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("BankDetailId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("CashRegisterDetailOppositeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -69,6 +145,9 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsCreatedByThis")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -76,6 +155,8 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                         .HasColumnType("money");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BankDetailId");
 
                     b.HasIndex("CashRegisterDetailOppositeId")
                         .IsUnique()
@@ -86,8 +167,72 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.ToTable("CashRegisterDetails");
                 });
 
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("money");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxDepartment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Town")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("WithdrawalAmount")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.BankDetail", b =>
+                {
+                    b.HasOne("EAccountingServer.Domain.Entities.BankDetail", "BankDetailOpposite")
+                        .WithMany()
+                        .HasForeignKey("BankDetailOppositeId");
+
+                    b.HasOne("EAccountingServer.Domain.Entities.Bank", null)
+                        .WithMany("Details")
+                        .HasForeignKey("BankId");
+
+                    b.HasOne("EAccountingServer.Domain.Entities.CashRegisterDetail", "CashRegisterDetail")
+                        .WithMany()
+                        .HasForeignKey("CashRegisterDetailId");
+
+                    b.Navigation("BankDetailOpposite");
+
+                    b.Navigation("CashRegisterDetail");
+                });
+
             modelBuilder.Entity("EAccountingServer.Domain.Entities.CashRegisterDetail", b =>
                 {
+                    b.HasOne("EAccountingServer.Domain.Entities.BankDetail", "BankDetail")
+                        .WithMany()
+                        .HasForeignKey("BankDetailId");
+
                     b.HasOne("EAccountingServer.Domain.Entities.CashRegisterDetail", "CashRegisterDetailOpposite")
                         .WithOne()
                         .HasForeignKey("EAccountingServer.Domain.Entities.CashRegisterDetail", "CashRegisterDetailOppositeId")
@@ -97,7 +242,14 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                         .WithMany("Details")
                         .HasForeignKey("CashRegisterId");
 
+                    b.Navigation("BankDetail");
+
                     b.Navigation("CashRegisterDetailOpposite");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Bank", b =>
+                {
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("EAccountingServer.Domain.Entities.CashRegister", b =>
