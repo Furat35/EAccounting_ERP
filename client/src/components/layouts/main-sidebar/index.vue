@@ -71,6 +71,22 @@
               </p>
             </router-link>
           </li>
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/customers" class="nav-link" style="cursor: pointer;">
+              <i class="nav-icon"></i>
+              <p>
+                Cariler
+              </p>
+            </router-link>
+          </li>
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/products" class="nav-link" style="cursor: pointer;">
+              <i class="nav-icon"></i>
+              <p>
+                Stoklar
+              </p>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </div>

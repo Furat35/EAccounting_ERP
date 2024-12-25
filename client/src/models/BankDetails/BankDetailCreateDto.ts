@@ -6,6 +6,8 @@ export class BankDetailCreateDto{
     amount: number = 0;
     oppositeBankId: string | null = "";
     cashRegisterId: string | null = "";
+    customerDetailId: string | null = "";
+    customerId: string = "";
     description: string = "";
     recordType: number = 0;
 }

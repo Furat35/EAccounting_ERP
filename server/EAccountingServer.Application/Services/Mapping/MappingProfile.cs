@@ -5,6 +5,9 @@ using EAccountingServer.Application.Features.CashRegisters.CreateCashRegister;
 using EAccountingServer.Application.Features.CashRegisters.UpdateCashRegister;
 using EAccountingServer.Application.Features.Companies.CreateCompany;
 using EAccountingServer.Application.Features.Companies.UpdateCompany;
+using EAccountingServer.Application.Features.Invoices.CreateInvoice;
+using EAccountingServer.Application.Features.Products.CreateProduct;
+using EAccountingServer.Application.Features.Products.UpdateProduct;
 using EAccountingServer.Application.Features.Users.CreateUser;
 using EAccountingServer.Application.Features.Users.UpdateUser;
 using EAccountingServer.Application.Models.Dtos.Users;
@@ -37,6 +40,19 @@ namespace EAccountingServer.Application.Mapping
             CreateMap<UpdateBankCommand, Bank>()
                 .ForMember(dest => dest.CurrencyType,
                        opt => opt.MapFrom(src => CurrencyTypeEnum.FromValue(src.CurrencyType)));
+
+            CreateMap<CreateProductCommand, Product>();
+            CreateMap<UpdateProductCommand, Product>();
+
+            CreateMap<CreateInvoiceCommand, Invoice>()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => InvoiceTypeEnum.FromValue(src.TypeValue)))
+                .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.InvoiceDetails.Select(s => new InvoiceDetail
+                {
+                    ProductId = s.ProductId,
+                    Quantity = s.Quantity,
+                    Price = s.Price
+                }).ToList()))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.InvoiceDetails.Sum(s => s.Quantity * s.Price)));
         }
     }
 }

@@ -15,7 +15,7 @@ namespace EAccountingServer.Application.Features.Customers.DeleteCustomerById
             var customer = await customerRepository.GetByExpressionWithTrackingAsync(p => p.Id == request.Id, cancellationToken);
             if (customer is null)
                 return Result<string>.Failure("Cari bulunamadı.");
-        
+
             customer.IsDeleted = true;
             await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             cacheService.Remove("customers");

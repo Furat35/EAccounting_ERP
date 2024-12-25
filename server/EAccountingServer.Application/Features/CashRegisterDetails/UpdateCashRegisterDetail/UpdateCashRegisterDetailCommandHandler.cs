@@ -1,5 +1,4 @@
 ﻿using EAccountingServer.Application.Services;
-using EAccountingServer.Domain.Entities;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +23,7 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.UpdateCashR
                 return Result<string>.Failure("Kasa hareketi bulunamadı.");
 
             if (cashRegisterDetail.IsCreatedByThis)
-                return Result<string>.Failure(StatusCodes.Status400BadRequest,"Yetkisiz işlem.");
+                return Result<string>.Failure(StatusCodes.Status400BadRequest, "Yetkisiz işlem.");
 
             var cashRegister = await cashRegisterRepository
                 .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.CashRegisterId, cancellationToken);
@@ -52,13 +51,13 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.UpdateCashR
                 oppositeCashRegisterDetail.DepositAmount = request.Amount;
                 oppositeCashRegisterDetail.Description = request.Description;
             }
-            else if(cashRegisterDetail.BankDetailId is not null)
+            else if (cashRegisterDetail.BankDetailId is not null)
             {
                 cashRegisterDetail.BankDetail = await bankDetailRepository
                     .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.BankDetailId, cancellationToken);
 
                 // update bank
-                var oppositeBank= await bankRepository
+                var oppositeBank = await bankRepository
                         .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.BankDetail.BankId, cancellationToken);
                 cashRegister.WithdrawalAmount += request.Amount - cashRegisterDetail.WithdrawalAmount;
                 oppositeBank.DepositAmount += request.Amount - oppositeBank.DepositAmount;
@@ -79,7 +78,7 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.UpdateCashR
                     cashRegisterDetail.Description = request.Description;
                     cashRegisterDetail.DepositAmount = request.Amount;
                 }
-                else 
+                else
                 {
                     cashRegister.WithdrawalAmount = cashRegister.DepositAmount + cashRegisterDetail.WithdrawalAmount - request.Amount;
                     cashRegisterDetail.Description = request.Description;

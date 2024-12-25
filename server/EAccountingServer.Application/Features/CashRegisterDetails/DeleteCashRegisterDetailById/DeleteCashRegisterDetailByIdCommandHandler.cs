@@ -6,7 +6,9 @@ using TS.Result;
 
 namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashRegisterDetailById
 {
-    public sealed class DeleteBankDetailByIdCommandHandler(
+    public sealed class DeleteCashRegisterDetailByIdCommandHandler(
+        ICustomerDetailRepository customerDetailRepository,
+        ICustomerRepository customerRepository,
         IBankDetailRepository bankDetailRepository,
         IBankRepository bankRepository,
         ICashRegisterRepository cashRegisterRepository,
@@ -22,7 +24,7 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashR
             if (cashRegisterDetail is null)
                 return Result<string>.Failure("Kasa hareketi bulunamadı.");
 
-            if (cashRegisterDetail.IsCreatedByThis)
+            if (!cashRegisterDetail.IsCreatedByThis)
                 return Result<string>.Failure(StatusCodes.Status400BadRequest, "Yetkisiz işlem.");
 
             var cashRegister = await cashRegisterRepository
@@ -65,6 +67,21 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashR
                 oppositeBank.WithdrawalAmount -= oppositeBankDetail.WithdrawalAmount;
 
                 bankDetailRepository.Update(oppositeBankDetail);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
+            else if (cashRegisterDetail.CustomerDetailId is not null)
+            {
+                var oppositeCustomerDetail = await customerDetailRepository
+                    .GetByExpressionWithTrackingAsync(c => c.Id == cashRegisterDetail.CustomerDetailId, cancellationToken);
+                oppositeCustomerDetail.IsDeleted = true;
+
+                var oppositeCustomer = await customerRepository
+                    .GetByExpressionWithTrackingAsync(p => p.Id == oppositeCustomerDetail.CustomerId, cancellationToken);
+
+                oppositeCustomer.DepositAmount -= oppositeCustomerDetail.DepositAmount;
+                oppositeCustomer.WithdrawalAmount -= oppositeCustomerDetail.WithdrawalAmount;
+
+                customerDetailRepository.Update(oppositeCustomerDetail);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
 

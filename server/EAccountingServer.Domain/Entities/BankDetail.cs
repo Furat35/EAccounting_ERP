@@ -14,7 +14,8 @@ namespace EAccountingServer.Domain.Entities
         public BankDetail? BankDetailOpposite { get; set; }
         public Guid? CashRegisterDetailId { get; set; }
         [ForeignKey(nameof(CashRegisterDetailId))]
-        public CashRegisterDetail? CashRegisterDetail{ get; set; }
+        public CashRegisterDetail? CashRegisterDetail { get; set; }
         public bool IsCreatedByThis { get; set; }
+        public Guid? CustomerDetailId { get; set; }
     }
 }

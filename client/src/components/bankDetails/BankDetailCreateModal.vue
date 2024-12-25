@@ -40,6 +40,7 @@
                                 <option value="0">Diğer</option>
                                 <option value="1">Banka</option>
                                 <option value="2">Kasa</option>
+                                <option value="3">Cari</option>
                             </select>
                         </div>
                         <div v-show="createModel.recordType == 1">
@@ -55,6 +56,14 @@
                                 <label for="cashRegisterId">Kasa</label><br>
                                 <select name="cashRegisterId" class="form-control" v-model="createModel.cashRegisterId">
                                     <option :value="cashRegister.id" v-for="cashRegister in cashRegisters">{{ cashRegister.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div v-show="createModel.recordType == 3">
+                            <div class="form-group mt-2">
+                                <label for="customerId">Cari</label><br>
+                                <select name="customerId" class="form-control" v-model="createModel.customerId">
+                                    <option :value="customer.id" v-for="customer in customers">{{ customer.name }}</option>
                                 </select>
                             </div>
                         </div>
@@ -78,6 +87,7 @@ import { CurrencyTypes, type CurrencyTypeModel } from '@/models/currency-type-en
 import { BankDetailCreateDto } from '@/models/BankDetails/BankDetailCreateDto';
 import type BankListDto from '@/models/Banks/BankListDto';
 import type { CashRegisterListDto } from '@/models/CashRegisters/CashRegisterListDto';
+import { CustomerListDto } from '@/models/Customers/CustomerListDto';
 
 export default {
     data() {
@@ -88,7 +98,8 @@ export default {
             bank: null as BankListDto | null,
             isLoading: false,
             currencyTypes: [] as CurrencyTypeModel[],
-            cashRegisters: [] as CashRegisterListDto[]
+            cashRegisters: [] as CashRegisterListDto[],
+            customers: [] as CustomerListDto[]
         }
     },
     components: {
@@ -100,6 +111,7 @@ export default {
     created() {
         this.setBanks();
         this.getCashRegisters();
+        this.getCustomers();
         this.currencyTypes = CurrencyTypes;
     },
     methods: {
@@ -130,6 +142,19 @@ export default {
                     this.isLoading = false;
                 })
         },
+        getCustomers() {
+            this.isLoading = true;
+            this.$axios.get('customers/getall')
+                .then(response => {
+                    this.customers = response.data.data as CustomerListDto[];
+                })
+                .catch(error => {
+                    console.log(error.response.data.errorMessages);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                })
+        },
         onSave() {
             if(!this.checkInputs())
                 return;
@@ -140,6 +165,9 @@ export default {
             }
             if(this.createModel.cashRegisterId == ""){
                 this.createModel.cashRegisterId = null;
+            }
+            if(this.createModel.customerId == ""){
+                this.createModel.customerId = null;
             }
             this.createModel.bankId = this.$route.params.id.toString();
             this.$axios.post('/bankDetails/create', this.createModel)

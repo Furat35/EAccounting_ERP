@@ -8,6 +8,10 @@ import BankDetailListComponent from '@/components/bankDetails/BankDetailList.vue
 import store from '../store/index'
 import CashRegisterDetailListComponent from '@/components/cashRegisterDetails/CashRegisterDetailList.vue'
 import BanksListComponent from '@/components/banks/bankList.vue'
+import CustomerListComponent from '@/components/customers/customerList.vue'
+import CustomerDetailListComponent from '@/components/customerDetails/customerDetailList.vue'
+import ProductListComponent from '@/components/products/productList.vue'
+import ProductDetailListComponent from '@/components/productDetails/productDetailList.vue'
 
 let authNotRequiredRoutes =[
   'login',
@@ -50,6 +54,22 @@ const router = createRouter({
         {
           path: '/bankDetails/:id',
           component: BankDetailListComponent,
+        },
+        {
+          path: '/customers',
+          component: CustomerListComponent,
+        },
+        {
+          path: '/customerDetails/:id',
+          component: CustomerDetailListComponent,
+        },
+        {
+          path: '/products',
+          component: ProductListComponent,
+        },
+        {
+          path: '/productDetails/:id',
+          component: ProductDetailListComponent,
         }
       ],
     },

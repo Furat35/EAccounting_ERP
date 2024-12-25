@@ -66,6 +66,9 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.Property<Guid?>("CashRegisterDetailId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CustomerDetailId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
@@ -136,6 +139,9 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.Property<Guid?>("CashRegisterId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CustomerDetailId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
@@ -173,14 +179,14 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DepositAmount")
                         .HasColumnType("money");
+
+                    b.Property<string>("FullAddress")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -206,6 +212,100 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.CustomerDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BankDetailId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CashRegisterDetailId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("money");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("WithdrawalAmount")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerDetails");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Deposit")
+                        .HasColumnType("money");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Withdrawal")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.ProductDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Deposit")
+                        .HasColumnType("money");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Withdrawal")
+                        .HasColumnType("money");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductDetail");
                 });
 
             modelBuilder.Entity("EAccountingServer.Domain.Entities.BankDetail", b =>
@@ -247,12 +347,38 @@ namespace EAccountingServer.Infrastructure.Migrations.CompanyDb
                     b.Navigation("CashRegisterDetailOpposite");
                 });
 
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.CustomerDetail", b =>
+                {
+                    b.HasOne("EAccountingServer.Domain.Entities.Customer", null)
+                        .WithMany("Details")
+                        .HasForeignKey("CustomerId");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.ProductDetail", b =>
+                {
+                    b.HasOne("EAccountingServer.Domain.Entities.Product", null)
+                        .WithMany("Details")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EAccountingServer.Domain.Entities.Bank", b =>
                 {
                     b.Navigation("Details");
                 });
 
             modelBuilder.Entity("EAccountingServer.Domain.Entities.CashRegister", b =>
+                {
+                    b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Customer", b =>
+                {
+                    b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("EAccountingServer.Domain.Entities.Product", b =>
                 {
                     b.Navigation("Details");
                 });

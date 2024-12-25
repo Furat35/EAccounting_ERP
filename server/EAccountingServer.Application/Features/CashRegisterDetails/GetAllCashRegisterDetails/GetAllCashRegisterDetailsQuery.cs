@@ -4,7 +4,7 @@ using TS.Result;
 
 namespace EAccountingServer.Application.Features.CashRegisterDetails.GetAllCashRegisterDetails
 {
-    public sealed record GetAllBankDetailsQuery(
+    public sealed record GetAllCashRegisterDetailsQuery(
         Guid CashRegisterId,
         DateOnly StartDate,
         DateOnly EndDate,

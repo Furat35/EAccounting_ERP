@@ -1,5 +1,6 @@
 ﻿using EAccountingServer.Application.Services;
 using EAccountingServer.Domain.Entities;
+using EAccountingServer.Domain.Enums;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
 using TS.Result;
@@ -7,6 +8,8 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashRegisterDetail
 {
     public sealed class CreateCashRegisterDetailCommandHandler(
+        ICustomerRepository customerRepository,
+        ICustomerDetailRepository customerDetailRepository,
         IBankRepository bankRepository,
         IBankDetailRepository bankDetailRepository,
         ICashRegisterRepository cashRegisterRepository,
@@ -90,9 +93,32 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
                 await bankDetailRepository.AddAsync(bankDetail, cancellationToken);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
+            else if (request.CustomerId is not null)
+            {
+                var customer = await customerRepository
+                    .GetByExpressionWithTrackingAsync(p => p.Id == request.CustomerId, cancellationToken);
+
+                customer.DepositAmount += request.Type == 1 ? request.Amount : 0;
+                customer.WithdrawalAmount += request.Type == 0 ? request.Amount : 0;
+                var customerDetail = new CustomerDetail()
+                {
+                    CustomerId = customer.Id,
+                    CashRegisterDetailId = cashRegister.Id,
+                    Date = request.Date,
+                    Description = request.Description,
+                    DepositAmount = request.Type == 1 ? request.Amount : 0,
+                    WithdrawalAmount = request.Type == 0 ? request.Amount : 0,
+                    Type = CustomerDetailTypeEnum.CashRegister
+                };
+
+                cashRegisterDetail.CustomerDetailId = customerDetail.Id;
+                await customerDetailRepository.AddAsync(customerDetail, cancellationToken);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
 
             cacheService.Remove("cashRegisters");
             cacheService.Remove("banks");
+            cacheService.Remove("customers");
 
             return "Kasa hareketi başarıyla işlendi.";
         }

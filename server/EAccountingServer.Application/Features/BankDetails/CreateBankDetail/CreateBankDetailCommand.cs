@@ -10,6 +10,7 @@ namespace EAccountingServer.Application.Features.BankDetails.CreateBankDetail
         decimal Amount,
         Guid? OppositeBankId,
         Guid? CashRegisterId,
+        Guid? CustomerId,
         string Description) : IRequest<Result<string>>;
 
 }

@@ -31,7 +31,7 @@ namespace EAccountingServer.Application.Behaviors
                     })
                 .ToDictionary(s => s.Key, s => s.Values[0]);
 
-            if (errorDictionary.Count == 0)
+            if (errorDictionary.Count != 0)
             {
                 var errors = errorDictionary.Select(s => new ValidationFailure
                 {

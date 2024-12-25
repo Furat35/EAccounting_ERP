@@ -16,7 +16,7 @@ namespace EAccountingServer.Application.Features.Customers.CreateCustomer
         public async Task<Result<string>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
         {
             var customer = mapper.Map<Customer>(request);
-            await customerRepository.AddAsync(customer, cancellationToken); 
+            await customerRepository.AddAsync(customer, cancellationToken);
             await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             cacheService.Remove("customers");
 

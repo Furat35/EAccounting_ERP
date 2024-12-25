@@ -1,5 +1,6 @@
 ﻿using EAccountingServer.Application.Services;
 using EAccountingServer.Domain.Entities;
+using EAccountingServer.Domain.Enums;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
 using TS.Result;
@@ -7,6 +8,8 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.BankDetails.CreateBankDetail
 {
     public sealed class CreateBankDetailCommandHandler(
+        ICustomerDetailRepository customerDetailRepository,
+        ICustomerRepository customerRepository,
         ICashRegisterRepository cashRegisterRepository,
         ICashRegisterDetailRepository cashRegisterDetailRepository,
         IBankRepository bankRepository,
@@ -73,7 +76,7 @@ namespace EAccountingServer.Application.Features.BankDetails.CreateBankDetail
                 await bankDetailRepository.AddAsync(oppositeBankDetail, cancellationToken);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
-            else if(request.CashRegisterId is not null)
+            else if (request.CashRegisterId is not null)
             {
                 var cashRegister = await cashRegisterRepository
                     .GetByExpressionWithTrackingAsync(p => p.Id == request.CashRegisterId, cancellationToken);
@@ -92,9 +95,33 @@ namespace EAccountingServer.Application.Features.BankDetails.CreateBankDetail
                 await cashRegisterDetailRepository.AddAsync(cashRegisterDetail, cancellationToken);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
+            else if (request.CustomerId is not null)
+            {
+                var customer = await customerRepository.GetByExpressionWithTrackingAsync(p => p.Id == request.CustomerId, cancellationToken);
+                if (customer is null)
+                    Result<string>.Failure("Cari bulunamadı");
+
+                customer.DepositAmount += request.Type == 1 ? request.Amount : 0;
+                customer.WithdrawalAmount += request.Type == 0 ? request.Amount : 1;
+
+                var customerDetail = new CustomerDetail()
+                {
+                    CustomerId = customer.Id,
+                    BankDetailId = bankDetail.Id,
+                    Date = request.Date,
+                    Description = request.Description,
+                    DepositAmount = request.Type == 1 ? request.Amount : 0,
+                    WithdrawalAmount = request.Type == 0 ? request.Amount : 1,
+                    Type = CustomerDetailTypeEnum.Bank
+                };
+                bankDetail.CustomerDetailId = customerDetail.Id;
+                await customerDetailRepository.AddAsync(customerDetail, cancellationToken);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
 
             cacheService.Remove("banks");
             cacheService.Remove("cashRegisters");
+            cacheService.Remove("customers");
 
             return "Banka hareketi başarıyla işlendi.";
         }

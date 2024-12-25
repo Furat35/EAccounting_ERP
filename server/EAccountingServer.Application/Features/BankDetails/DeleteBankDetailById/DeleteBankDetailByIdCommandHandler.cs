@@ -1,6 +1,5 @@
 ﻿using EAccountingServer.Application.Features.CashRegisterDetails.DeleteCashRegisterDetailById;
 using EAccountingServer.Application.Services;
-using EAccountingServer.Domain.Entities;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +8,8 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.BankDetails.DeleteBankDetailById
 {
     public sealed class DeleteBankDetailByIdCommandHandler(
+        ICustomerDetailRepository customerDetailRepository,
+        ICustomerRepository customerRepository,
         ICashRegisterRepository cashRegisterRepository,
         ICashRegisterDetailRepository cashRegisterDetailRepository,
         IBankRepository bankRepository,
@@ -24,7 +25,7 @@ namespace EAccountingServer.Application.Features.BankDetails.DeleteBankDetailByI
             if (bankDetail is null)
                 return Result<string>.Failure("Banka hareketi bulunamadı.");
 
-            if (bankDetail.IsCreatedByThis)
+            if (!bankDetail.IsCreatedByThis)
                 return Result<string>.Failure(StatusCodes.Status400BadRequest, "Yetkisiz işlem.");
 
             var bank = await bankRepository
@@ -70,9 +71,25 @@ namespace EAccountingServer.Application.Features.BankDetails.DeleteBankDetailByI
                 cashRegisterDetailRepository.Update(cashRegisterDetail);
                 await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
             }
+            else if (bankDetail.CustomerDetailId is not null)
+            {
+                var customerDetail = await customerDetailRepository
+                    .GetByExpressionWithTrackingAsync(c => c.Id == bankDetail.CustomerDetailId, cancellationToken);
+                customerDetail.IsDeleted = true;
+
+                var customer = await customerRepository
+                    .GetByExpressionWithTrackingAsync(p => p.Id == customerDetail.CustomerId, cancellationToken);
+
+                customer.DepositAmount -= customerDetail.DepositAmount;
+                customer.WithdrawalAmount -= customerDetail.WithdrawalAmount;
+
+                customerDetailRepository.Update(customerDetail);
+                await unitOfWorkCompany.SaveChangesAsync(cancellationToken);
+            }
 
             cacheService.Remove("banks");
             cacheService.Remove("cashRegisters");
+            cacheService.Remove("customers");
 
             return "Banka hareketi başarıyla silindi.";
         }

@@ -11,7 +11,7 @@ namespace EAccountingServer.WebAPI.Controllers
     public class CashRegisterDetailsController(IMediator mediator) : ApiController(mediator)
     {
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] GetAllBankDetailsQuery request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] GetAllCashRegisterDetailsQuery request, CancellationToken cancellationToken)
         {
             var response = await _mediator.Send(request, cancellationToken);
             return StatusCode(response.StatusCode, response);

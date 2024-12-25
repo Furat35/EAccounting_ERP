@@ -72,7 +72,42 @@ namespace EAccountingServer.Infrastructure.Context
             modelBuilder.Entity<Customer>()
                 .Property(p => p.Type)
                 .HasConversion(type => type.Value, value => CustomerTypeEnum.FromValue(value));
-            modelBuilder.Entity<Customer>().HasQueryFilter(filter => !filter.IsDeleted);    
+            modelBuilder.Entity<Customer>().HasQueryFilter(filter => !filter.IsDeleted);
+            #endregion
+
+            #region Customer Detail
+            modelBuilder.Entity<CustomerDetail>().Property(c => c.DepositAmount).HasColumnType("money");
+            modelBuilder.Entity<CustomerDetail>().Property(c => c.WithdrawalAmount).HasColumnType("money");
+            modelBuilder.Entity<CustomerDetail>()
+                .Property(p => p.Type)
+                .HasConversion(type => type.Value, value => CustomerDetailTypeEnum.FromValue(value));
+            #endregion
+
+            #region Product
+            modelBuilder.Entity<Product>().HasQueryFilter(c => !c.IsDeleted);
+            modelBuilder.Entity<Product>().Property(c => c.Deposit).HasColumnType("money");
+            modelBuilder.Entity<Product>().Property(c => c.Withdrawal).HasColumnType("money");
+            #endregion
+
+
+            #region Product Detail
+            modelBuilder.Entity<ProductDetail>().Property(c => c.Deposit).HasColumnType("money");
+            modelBuilder.Entity<ProductDetail>().Property(c => c.Withdrawal).HasColumnType("money");
+            #endregion
+
+            #region Invoice
+            modelBuilder.Entity<Invoice>().Property(c => c.Amount).HasColumnType("money");
+            modelBuilder.Entity<Invoice>()
+                 .Property(p => p.Type)
+                 .HasConversion(type => type.Value, value => InvoiceTypeEnum.FromValue(value));
+            modelBuilder.Entity<Invoice>().HasQueryFilter(c => !c.IsDeleted);
+            modelBuilder.Entity<Invoice>().HasQueryFilter(c => !c.Customer.IsDeleted);
+            #endregion
+
+
+            #region Invoice Detail
+            modelBuilder.Entity<InvoiceDetail>().Property(c => c.Quantity).HasColumnType("decimal(7,2)");
+            modelBuilder.Entity<InvoiceDetail>().Property(c => c.Price).HasColumnType("money");
             #endregion
         }
 
@@ -81,6 +116,10 @@ namespace EAccountingServer.Infrastructure.Context
         public DbSet<Bank> Banks { get; set; }
         public DbSet<BankDetail> BankDetails { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<CustomerDetail> CustomerDetails { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
 
         private void CreateConnectionString(IHttpContextAccessor httpContext, ApplicationDbContext context)
         {

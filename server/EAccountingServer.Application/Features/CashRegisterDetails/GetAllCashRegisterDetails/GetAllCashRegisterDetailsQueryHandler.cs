@@ -7,12 +7,12 @@ using TS.Result;
 namespace EAccountingServer.Application.Features.CashRegisterDetails.GetAllCashRegisterDetails
 {
     public sealed class GetAllCashRegisterDetailsQueryHandler(ICashRegisterRepository cashRegisterRepository)
-        : IRequestHandler<GetAllBankDetailsQuery, Result<CashRegister>>
+        : IRequestHandler<GetAllCashRegisterDetailsQuery, Result<CashRegister>>
     {
-        public async Task<Result<CashRegister>> Handle(GetAllBankDetailsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<CashRegister>> Handle(GetAllCashRegisterDetailsQuery request, CancellationToken cancellationToken)
         {
             CashRegister cashRegister;
-            if(request.GetAll)
+            if (request.GetAll)
                 cashRegister = await cashRegisterRepository
                     .Where(c => c.Id == request.CashRegisterId)
                     .Include(c => c.Details)

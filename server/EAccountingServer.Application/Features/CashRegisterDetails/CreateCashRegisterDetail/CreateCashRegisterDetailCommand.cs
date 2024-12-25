@@ -10,6 +10,7 @@ namespace EAccountingServer.Application.Features.CashRegisterDetails.CreateCashR
         int Type, // 0 => Deposit, 1 => withdraw
         decimal Amount,
         Guid? OppositeCashRegisterId,
+        Guid? CustomerId,
         string Description) : IRequest<Result<string>>;
 
 }

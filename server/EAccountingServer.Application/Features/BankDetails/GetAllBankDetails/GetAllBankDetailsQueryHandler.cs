@@ -26,7 +26,7 @@ namespace EAccountingServer.Application.Features.BankDetails.GetAllBankDetails
                     .Include(c => c.Details.Where(d => d.Date >= request.StartDate && d.Date <= request.EndDate))
                     .FirstOrDefaultAsync(cancellationToken);
             }
-            
+
 
             return bank ?? Result<Bank>.Failure("Banka bulunamadı!");
         }

@@ -5,6 +5,7 @@ export class CashRegisterDetailCreateDto{
     amount: number = 0;
     oppositeCashRegisterId: string | null = "";
     bankId: string | null = "";
+    customerId: string | null = "";
     description: string = "";
     recordType: number = 0;
     isCreatedByThis: boolean = false;
