@@ -12,6 +12,7 @@ import CustomerListComponent from '@/components/customers/customerList.vue'
 import CustomerDetailListComponent from '@/components/customerDetails/customerDetailList.vue'
 import ProductListComponent from '@/components/products/productList.vue'
 import ProductDetailListComponent from '@/components/productDetails/productDetailList.vue'
+import InvoiceListComponent from '@/components/invoices/invoiceListComponent.vue'
 
 let authNotRequiredRoutes =[
   'login',
@@ -28,6 +29,7 @@ const router = createRouter({
       component: HomeView,
       children: [
         {
+          name: 'homePage',
           path: 'home',
           component: HomeListComponent
         },
@@ -70,6 +72,10 @@ const router = createRouter({
         {
           path: '/productDetails/:id',
           component: ProductDetailListComponent,
+        },
+        {
+          path: '/invoices',
+          component: InvoiceListComponent,
         }
       ],
     },

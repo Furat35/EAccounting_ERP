@@ -87,6 +87,14 @@
               </p>
             </router-link>
           </li>
+          <li class="nav-item" v-if="userIsAdmin">
+            <router-link to="/invoices" class="nav-link" style="cursor: pointer;">
+              <i class="nav-icon"></i>
+              <p>
+                Faturalar
+              </p>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </div>

@@ -1,5 +1,4 @@
 ﻿using EAccountingServer.Application.Services;
-using EAccountingServer.Domain.Entities;
 using EAccountingServer.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -58,7 +57,7 @@ namespace EAccountingServer.Application.Features.BankDetails.UpdateBankDetail
                     .GetByExpressionWithTrackingAsync(c => c.Id == bankDetail.CashRegisterDetailId, cancellationToken);
 
                 // update bank
-                var oppositeCashRegister= await cashRegisterRepository
+                var oppositeCashRegister = await cashRegisterRepository
                         .GetByExpressionWithTrackingAsync(c => c.Id == bankDetail.CashRegisterDetail.CashRegisterId, cancellationToken);
                 bank.WithdrawalAmount += request.Amount - bankDetail.WithdrawalAmount;
                 oppositeCashRegister.DepositAmount += request.Amount - bankDetail.DepositAmount;

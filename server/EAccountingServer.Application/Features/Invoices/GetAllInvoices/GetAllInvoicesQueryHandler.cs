@@ -14,11 +14,17 @@ namespace EAccountingServer.Application.Features.Invoices.GetAllInvoices
         public async Task<Result<List<Invoice>>> Handle(GetAllInvoicesQuery request, CancellationToken cancellationToken)
         {
             List<Invoice>? invoices;
-            string key = request.Type == 1 ? "purchaseInvoices" : key = "sellingInvoices";
+            string key = "invoices";
             invoices = cacheService.Get<List<Invoice>>(key);
             if (invoices is null)
             {
-                invoices = await invoiceRepository.Where(p => p.Type.Value == request.Type).OrderBy(p => p.Date).ToListAsync(cancellationToken);
+                invoices = await invoiceRepository
+                    .GetAll()
+                    .Include(p => p.Customer)
+                    .Include(p => p.Details)
+                    .ThenInclude(p => p.Product)
+                    .OrderBy(p => p.Date)
+                    .ToListAsync(cancellationToken);
                 cacheService.Set(key, invoices);
             }
 

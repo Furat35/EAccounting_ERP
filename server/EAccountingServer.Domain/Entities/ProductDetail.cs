@@ -9,5 +9,7 @@ namespace EAccountingServer.Domain.Entities
         public string Description { get; set; }
         public decimal Deposit { get; set; }
         public decimal Withdrawal { get; set; }
+        public decimal Price { get; set; }
+        public Guid? InvoiceId { get; set; }
     }
 }

@@ -9,5 +9,5 @@ namespace EAccountingServer.Application.Features.Invoices.CreateInvoice
         DateOnly Date,
         string InvoiceNumber,
         Guid CustomerId,
-        List<InvoiceDetailDto> InvoiceDetails) : IRequest<Result<string>>;
+        List<InvoiceDetailDto> Details) : IRequest<Result<string>>;
 }

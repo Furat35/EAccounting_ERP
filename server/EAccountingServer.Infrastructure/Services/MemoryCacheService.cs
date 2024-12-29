@@ -18,6 +18,23 @@ namespace EAccountingServer.Infrastructure.Services
             return true;
         }
 
+        public bool RemoveAll()
+        {
+            List<string> keys = new()
+            {
+                "cashRegisters",
+                "banks",
+                "invoices",
+                "products",
+                "customers"
+            };
+            foreach (var key in keys)
+            {
+                cache.Remove(key);
+            }
+            return true;
+        }
+
         public void Set<T>(string key, T value, TimeSpan? expiry = null)
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions

@@ -13,8 +13,8 @@ namespace EAccountingServer.Application.Features.Auth.Login
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJwtProvider jwtProvider,
-        ICompanyUserRepository companyUserRepository)
-        : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
+        ICompanyUserRepository companyUserRepository,
+        ICacheService cacheService) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
@@ -74,7 +74,7 @@ namespace EAccountingServer.Application.Features.Auth.Login
             //    RefreshToken = loginResponse.RefreshToken,
             //    UserName = user.UserName,
             //}
-
+            cacheService.RemoveAll();
             return loginResponse;
         }
     }

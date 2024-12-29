@@ -93,6 +93,7 @@ namespace EAccountingServer.Infrastructure.Context
             #region Product Detail
             modelBuilder.Entity<ProductDetail>().Property(c => c.Deposit).HasColumnType("money");
             modelBuilder.Entity<ProductDetail>().Property(c => c.Withdrawal).HasColumnType("money");
+            modelBuilder.Entity<ProductDetail>().Property(c => c.Price).HasColumnType("money");
             #endregion
 
             #region Invoice
@@ -108,6 +109,7 @@ namespace EAccountingServer.Infrastructure.Context
             #region Invoice Detail
             modelBuilder.Entity<InvoiceDetail>().Property(c => c.Quantity).HasColumnType("decimal(7,2)");
             modelBuilder.Entity<InvoiceDetail>().Property(c => c.Price).HasColumnType("money");
+            modelBuilder.Entity<InvoiceDetail>().HasQueryFilter(filter => !filter.Product.IsDeleted);
             #endregion
         }
 

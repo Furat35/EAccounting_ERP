@@ -17,15 +17,13 @@ namespace EAccountingServer.Application.Features.Users.CreateUser
     {
         public async Task<Result<string>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            bool userNameExists = await userManager.Users
+            var userNameExists = await userManager.Users
                 .AnyAsync(p => p.UserName == request.UserName, cancellationToken);
-            if (userNameExists)
-                return Result<string>.Failure("Bu kullanıcı adı daha önce kullanılmış.");
-
             var emailExists = await userManager.Users
                 .AnyAsync(p => p.Email == request.Email, cancellationToken);
-            if (emailExists)
-                return Result<string>.Failure("Bu mail adresi daha önce kullanılmış.");
+
+            if (userNameExists || emailExists)
+                return Result<string>.Failure("Bu kullanıcı adı veya mail adresi daha önce kullanılmış.");
 
             var appUser = mapper.Map<AppUser>(request);
             appUser.CompanyUsers = request.CompanyIds.Select(id => new CompanyUser

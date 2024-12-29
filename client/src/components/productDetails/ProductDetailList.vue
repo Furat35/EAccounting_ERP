@@ -19,6 +19,8 @@
                                 <th>Açıklama</th>
                                 <th>Giriş</th>
                                 <th>Çıkış</th>
+                                <th>Birim Fiyat</th>
+                                <th>Toplam Tutar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -26,8 +28,10 @@
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ productDetail.date }}</td>
                                 <td>{{ productDetail.description }}</td>
-                                <td>{{ productDetail.depositAmount }}</td>
-                                <td>{{ productDetail.withdrawalAmount }}</td>
+                                <td>{{ productDetail.deposit }}</td>
+                                <td>{{ productDetail.withdrawal }}</td>
+                                <td>{{ productDetail.price }}</td>
+                                <td>{{ productDetail.withdrawal * (productDetail.deposit + productDetail.withdrawal)}}</td>
                              </tr>
                         </tbody>
                     </table>

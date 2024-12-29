@@ -46,13 +46,13 @@ namespace EAccountingServer.Application.Mapping
 
             CreateMap<CreateInvoiceCommand, Invoice>()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => InvoiceTypeEnum.FromValue(src.TypeValue)))
-                .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.InvoiceDetails.Select(s => new InvoiceDetail
+                .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details.Select(s => new InvoiceDetail
                 {
                     ProductId = s.ProductId,
                     Quantity = s.Quantity,
                     Price = s.Price
                 }).ToList()))
-                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.InvoiceDetails.Sum(s => s.Quantity * s.Price)));
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Details.Sum(s => s.Quantity * s.Price)));
         }
     }
 }

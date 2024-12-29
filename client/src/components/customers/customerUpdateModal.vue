@@ -1,6 +1,6 @@
 <template>
     <div class="modal fade" id="updateCustomerModal" tabindex="-1" role="dialog" aria-labelledby="updateCustomerModal">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Cari Güncelleme</h1><button type="button" data-dismiss="modal"
@@ -62,7 +62,7 @@
 import Spinner from '@/components/layouts/spinner/index.vue';
 import Swal from 'sweetalert2';
 import { CustomerUpdateDto } from '@/models/Customers/CustomerUpdateDto';
-import { CustomerListDto } from '@/models/Customers/CustomerListDto';
+import { CustomerListDto, CustomerTypeEnum } from '@/models/Customers/CustomerListDto';
 import  { CustomerTypes } from '@/models/Customers/CustomerListDto';
 
 export default {
@@ -99,7 +99,7 @@ export default {
                 return;
 
             this.isLoading = true;
-            this.updateModel.currencyType = $('#updateCustomerModal [name="currencyType"]').val() as number;
+            // this.updateModel.currencyType = $('#updateCustomerModal [name="currencyType"]').val() as number;
             this.$axios.post('/customers/update', this.updateModel)
                 .then(() => {
                     Swal.fire("Cari başarıyla güncellendi!");

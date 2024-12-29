@@ -5,4 +5,5 @@ export class ProductDetailListDto{
     date: string = "";
     deposit: number = 0;
     withdrawal: number = 0;
+    price: number = 0;
 }

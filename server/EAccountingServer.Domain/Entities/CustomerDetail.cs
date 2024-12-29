@@ -13,5 +13,6 @@ namespace EAccountingServer.Domain.Entities
         public decimal WithdrawalAmount { get; set; } // Çıkış
         public Guid? BankDetailId { get; set; }
         public Guid? CashRegisterDetailId { get; set; }
+        public Guid? InvoiceId { get; set; }
     }
 }

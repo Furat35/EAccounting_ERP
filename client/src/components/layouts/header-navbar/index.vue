@@ -50,10 +50,20 @@ export default {
                     var jsonData = JSON.stringify(response.data.data);
                     const decodedToken = jwtDecode(response.data.data.token);
                     let companies = JSON.parse(decodedToken.Companies);
-                    let loginResponse = new LoginResponse(decodedToken.Id, decodedToken.Email, 
-                    decodedToken.UserName, decodedToken.Name, decodedToken.CompanyId, companies); 
+                    let isAdmin = decodedToken.IsAdmin.toLowerCase() === 'true';
+                    
+                    let loginResponse = new LoginResponse();
+                    loginResponse.id = decodedToken.Id, 
+                    loginResponse.email = decodedToken.Email, 
+                    loginResponse.username = decodedToken.UserName, 
+                    loginResponse.name = decodedToken.Name, 
+                    loginResponse.companyId = decodedToken.CompanyId, 
+                    loginResponse.companies = companies; 
+                    loginResponse.isAdmin = isAdmin;
                     this.$store.commit("setUser", loginResponse);
                     localStorage.setItem('tokenInfo', jsonData);
+                    location.reload(true);
+                    // this.$router.push(currentPage);
                 })
                 .catch(error => {
                     let errorDetail
@@ -61,7 +71,7 @@ export default {
                         errorDetail = error.response.data.errorMessages[0];
                     }
                     catch {
-                        errorDetail = "Kullanıcı oluşturulurken hata oluştu!";
+                        errorDetail = "Şirket değiştirilirken hata oluştu!";
                     }
                     this.errorMessage = errorDetail;
                     setTimeout(() => {

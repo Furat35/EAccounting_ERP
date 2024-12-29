@@ -6,7 +6,6 @@ import companyList from '@/components/companies/companyList.vue'
 import userList from '@/components/users/userList.vue'
 import homeList from '@/components/home/homeList.vue'
 import cashRegisterList from '@/components/cashRegisters/cashRegisterList.vue'
-import Spinner from '@/components/layouts/spinner/index.vue';
 
 export default {
   data(){

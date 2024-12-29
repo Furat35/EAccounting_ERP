@@ -29,6 +29,23 @@ namespace EAccountingServer.Infrastructure.Services
             return _database.KeyDelete(key);
         }
 
+        public bool RemoveAll()
+        {
+            List<string> keys = new()
+            {
+                "cashRegisters",
+                "banks",
+                "invoices",
+                "products",
+                "customers"
+            };
+            foreach (var key in keys)
+            {
+                _database.KeyDelete(key);
+            }
+            return true;
+        }
+
         public void Set<T>(string key, T value, TimeSpan? expiry = null)
         {
             var serializedValue = JsonSerializer.Serialize(value);

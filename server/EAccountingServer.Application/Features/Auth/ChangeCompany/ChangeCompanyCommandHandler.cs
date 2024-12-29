@@ -15,8 +15,9 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
     public sealed class ChangeCompanyCommandHandler(
         ICompanyUserRepository companyUserRepository,
         UserManager<AppUser> userManager,
-        IHttpContextAccessor httpContextAccessor, IJwtProvider jwtProvider)
-        : IRequestHandler<ChangeCompanyCommand, Result<LoginCommandResponse>>
+        IHttpContextAccessor httpContextAccessor,
+        IJwtProvider jwtProvider,
+        ICacheService cacheService) : IRequestHandler<ChangeCompanyCommand, Result<LoginCommandResponse>>
     {
         public async Task<Result<LoginCommandResponse>> Handle(ChangeCompanyCommand request, CancellationToken cancellationToken)
         {
@@ -35,6 +36,9 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
                 .Include(cu => cu.Company)
                 .ToListAsync(cancellationToken);
 
+            if (!companyUsers.Any(cu => cu.CompanyId == request.CompanyId))
+                Result<string>.Failure(StatusCodes.Status403Forbidden, "Yetkisiz işlem!");
+
             var companies = companyUsers.Select(cu => new CompanyListDto
             {
                 Id = cu.CompanyId,
@@ -45,6 +49,8 @@ namespace EAccountingServer.Application.Features.Auth.ChangeCompany
             }).ToList();
 
             var response = await jwtProvider.CreateToken(user, request.CompanyId, companies);
+            cacheService.RemoveAll();
+
             return response;
         }
     }

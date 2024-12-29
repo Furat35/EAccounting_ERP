@@ -1,5 +1,3 @@
-import { CustomerTypeEnum } from "./CustomerListDto";
-
 export class CustomerCreateDto{
     id: string = "";
     name: string = "";
